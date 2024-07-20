@@ -1,0 +1,25 @@
+{
+    "name": "tereta/framework.application",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Framework\\Application\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tereta Alexander",
+            "email": "tereta.alexander@gmail.com"
+        }
+    ],
+    "require": {
+        "tereta/framework.config": "^0.0.1",
+        "tereta/framework.process": "^0.0.1",
+        "tereta/framework.controller": "^0.0.1",
+        "tereta/framework.http": "^0.0.1",
+        "tereta/framework.view": "^0.0.1",
+        "tereta/framework.cli": "^0.0.1",
+        "tereta/framework.docker": "^0.0.1",
+        "tereta/framework.helper": "^0.0.1"
+    }
+}
