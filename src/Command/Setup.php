@@ -15,6 +15,7 @@ use ReflectionClass;
 class Setup extends Command
 {
     private string $rootDirectory;
+    private ?Config $config = null;
 
     public static function getDescription(): string {
         return "Setup and upgrade the configuration structure and modules";
@@ -107,7 +108,8 @@ class Setup extends Command
             ];
         }
 
-        (new Config('php', $activeModules))->save($this->rootDirectory . '/app/etc/modules.php');
+        $this->config = (new Config('php', $activeModules))
+            ->save($this->rootDirectory . '/app/etc/modules.php');
 
         echo static::SYMBOL_COLOR_GREEN. "Modules successfully initialized.\n" . static::SYMBOL_COLOR_RESET;
     }
