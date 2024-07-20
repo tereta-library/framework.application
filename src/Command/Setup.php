@@ -74,6 +74,11 @@ class Setup extends Command
             $modules[$namespace] = [dirname($fullFilePath)];
         }
 
+        $initialConfig = [];
+        if (file_exists($this->rootDirectory . '/app/etc/modules.php')) {
+            $initialConfig = (new Config('php'))->load($this->rootDirectory . '/app/etc/modules.php')->getData();
+        }
+
         foreach ($modules as $namespace => $item) {
             if (!$namespace) continue;
             $pathArray = $this->pathPrepare($item);
@@ -89,10 +94,15 @@ class Setup extends Command
                 continue;
             }
 
-            echo Command::SYMBOL_COLOR_WHITE . "Module {$namespace} found.\n" . Command::SYMBOL_COLOR_RESET;
+            $isActive = true;
+            if (isset($initialConfig[$namespace]['enabled']) && !$initialConfig[$namespace]['enabled']) {
+                $isActive = false;
+            }
+
+            echo Command::SYMBOL_COLOR_WHITE . "Module {$namespace} found: " . ($isActive ? "[Enabled]" : "[Disabled]") . ".\n" . Command::SYMBOL_COLOR_RESET;
 
             $activeModules[$namespace] = [
-                'enabled' => true,
+                'enabled' => $isActive,
                 'path' => $path
             ];
         }
