@@ -2,7 +2,8 @@
 
 rootDir=$(realpath "$(dirname "$0")/../../../../..")
 
-echo "$rootDir"
+echo "Root directory is: $rootDir"
+echo "Creating initial directories"
 
 mkdir -p "$rootDir/var"
 chmod 0777 "$rootDir/var"
@@ -26,10 +27,12 @@ mkdir -p "$rootDir/app/view"
 chmod 0744 "$rootDir/app/view"
 
 if [ "$1" != "copy" ]; then
+  echo "Linking initial files"
   ln -s "$rootDir/vendor/tereta/framework.application/src/shell/files/pubIndex.php" "$rootDir/pub/index.php"
   ln -s "$rootDir/vendor/tereta/framework.application/src/shell/files/pubHtaccess" "$rootDir/pub/.htaccess"
   ln -s "$rootDir/vendor/tereta/framework.application/src/shell/files/cli.php" "$rootDir/cli.php"
 else
+  echo "Copying initial files"
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/pubIndex.php" "$rootDir/pub/index.php"
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/pubHtaccess" "$rootDir/pub/.htaccess"
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/cli.php" "$rootDir/cli.php"
