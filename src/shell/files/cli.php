@@ -5,15 +5,16 @@ $rootDir = realpath(__DIR__ . '/../../../../../..');
 require_once "{$rootDir}/vendor/autoload.php";
 
 use Framework\Application\Manager;
+use Framework\Cli\Abstract\Command;
 
 try {
     Manager::init($rootDir, 'cli')->setRouter([
         'setup' => 'Framework\Application\Command\Setup->execute'
     ])->run();
 } catch (Exception $e) {
-    echo "\033[91m{$e->getMessage()}\033[0m\n";
-    echo "\033[37m";
+    echo Command::SYMBOL_COLOR_RED . "{$e->getMessage()}\n" . Command::SYMBOL_COLOR_RESET;
+    echo Command::SYMBOL_COLOR_BRIGHT_WHITE;
     echo "Exception: {$e->getFile()}:{$e->getLine()}\n";
     echo "Backtrace: {$e->getTraceAsString()}";
-    echo "\033[0m";
+    echo Command::SYMBOL_COLOR_RESET;
 }

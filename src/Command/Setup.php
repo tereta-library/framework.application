@@ -41,31 +41,65 @@ class Setup extends Command
             );
         }
 
+        echo static::SYMBOL_COLOR_GREEN . "Setup modules.\n" . static::SYMBOL_COLOR_RESET;
+        echo static::SYMBOL_COLOR_GREEN . "Initialising modules.\n" . static::SYMBOL_COLOR_RESET;
+
+        $this->setupModules();
+    }
+
+    private function setupModules(): void
+    {
+        if ($this->modifyComposer()) {
+            return;
+        }
+
+        $modules = require($this->rootDirectory . '/vendor/composer/autoload_psr4.php');
+        $modulesDir = $this->rootDirectory . '/app/module';
+        if (!is_dir($modulesDir)) {
+            throw new Exception(
+                "Directory {$modulesDir} is not created.\n" .
+                "Run {$this->rootDirectory}/vendor/tereta/framework.application/src/shell/install.sh to installation"
+            );
+        }
+
+        echo static::SYMBOL_COLOR_GREEN . "Setup modules.\n" . static::SYMBOL_COLOR_RESET;
+        echo static::SYMBOL_COLOR_GREEN. "Initialising modules.\n" . static::SYMBOL_COLOR_RESET;
+
         $files = File::getFiles($modulesDir, '/.*\/.*\/Module.php/Usi');
         $activeModules = [];
+
         foreach ($files as $directory) {
             $fullFilePath = "{$modulesDir}/{$directory}";
-            if (!is_file($fullFilePath)) continue;
             $namespace = str_replace('/', '\\', dirname($directory));
+            $modules[$namespace] = [dirname($fullFilePath)];
+        }
 
+        foreach ($modules as $namespace => $item) {
+            if (!$namespace) continue;
+            $pathArray = $this->pathPrepare($item);
+            $path = array_shift($pathArray);
+
+            if (!file_exists("{$this->rootDirectory}/{$path}/Module.php")) {
+                continue;
+            }
+
+            $namespace = rtrim($namespace, '\\');
             $moduleClass = new ReflectionClass($namespace . '\\Module');
             if (!$moduleClass->implementsInterface(ModuleInterface::class)) {
                 continue;
             }
 
-            $activeModules[$namespace] = [dirname($fullFilePath)];
-        }
+            echo Command::SYMBOL_COLOR_WHITE . "Module {$namespace} found.\n" . Command::SYMBOL_COLOR_RESET;
 
-        foreach ($activeModules as $key => $item) {
-            $pathArray = $this->pathPrepare($item);
-
-            $activeModules[$key] = [
+            $activeModules[$namespace] = [
                 'enabled' => true,
-                'path' => array_shift($pathArray)
+                'path' => $path
             ];
         }
 
         (new Config('php', $activeModules))->save($this->rootDirectory . '/app/etc/modules.php');
+
+        echo static::SYMBOL_COLOR_GREEN. "Modules successfully initialized.\n" . static::SYMBOL_COLOR_RESET;
     }
 
     private function pathPrepare(array $values): array
