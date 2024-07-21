@@ -10,7 +10,7 @@ use Framework\Cli\Abstract\Command;
 try {
     Manager::init($rootDir, 'cli')->setRouter([
         'setup' => 'Framework\Application\Command\Setup->execute'
-    ])->run();
+    ], true)->run();
 } catch (Exception $e) {
     echo Command::SYMBOL_COLOR_RED . "{$e->getMessage()}\n" . Command::SYMBOL_COLOR_RESET;
     echo Command::SYMBOL_COLOR_BRIGHT_WHITE;

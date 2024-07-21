@@ -10,16 +10,25 @@ use Exception;
 use ReflectionClass;
 
 /**
- * use Framework\Application\Command\Setup;
+ * ···························WWW.TERETA.DEV······························
+ * ·······································································
+ * : _____                        _                     _                :
+ * :|_   _|   ___   _ __    ___  | |_    __ _        __| |   ___  __   __:
+ * :  | |    / _ \ | '__|  / _ \ | __|  / _` |      / _` |  / _ \ \ \ / /:
+ * :  | |   |  __/ | |    |  __/ | |_  | (_| |  _  | (_| | |  __/  \ V / :
+ * :  |_|    \___| |_|     \___|  \__|  \__,_| (_)  \__,_|  \___|   \_/  :
+ * ·······································································
+ * ·······································································
+ *
+ * @class Framework\Application\Command\Setup
+ * @package Framework\Application\Command
+ * @link https://tereta.dev
+ * @author Tereta Alexander <tereta.alexander@gmail.com>
  */
 class Setup extends Command
 {
     private string $rootDirectory;
     private ?Config $config = null;
-
-    public static function getDescription(): string {
-        return "Setup and upgrade the configuration structure and modules";
-    }
 
     public function __construct(array $argumentValues)
     {
@@ -27,6 +36,13 @@ class Setup extends Command
         parent::__construct($argumentValues);
     }
 
+    /**
+     * @cli setup
+     * @cliDescription Setup and upgrade the configuration structure and modules
+     *
+     * @return void
+     * @throws Exception
+     */
     public function execute(): void
     {
         if ($this->modifyComposer()) {

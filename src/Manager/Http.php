@@ -3,6 +3,7 @@
 namespace Framework\Application\Manager;
 
 use Framework\Application\Interface\Manager;
+use Framework\Application\Manager as ParentManager;
 use Framework\Controller\Action as ControllerAction;
 use Framework\Http\Router as HttpRouter;
 use Framework\Http\Router\Expression as HttpRouterExpression;
@@ -12,7 +13,20 @@ use App\Controller\Error as ControllerError;
 use Exception;
 
 /**
- * class Framework\Application\Manager\Http
+ * ···························WWW.TERETA.DEV······························
+ * ·······································································
+ * : _____                        _                     _                :
+ * :|_   _|   ___   _ __    ___  | |_    __ _        __| |   ___  __   __:
+ * :  | |    / _ \ | '__|  / _ \ | __|  / _` |      / _` |  / _ \ \ \ / /:
+ * :  | |   |  __/ | |    |  __/ | |_  | (_| |  _  | (_| | |  __/  \ V / :
+ * :  |_|    \___| |_|     \___|  \__|  \__,_| (_)  \__,_|  \___|   \_/  :
+ * ·······································································
+ * ·······································································
+ *
+ * @class Framework\Application\Manager\Http
+ * @package Framework\Application\Manager
+ * @link https://tereta.dev
+ * @author Tereta Alexander <tereta.alexander@gmail.com>
  */
 class Http implements Manager
 {
@@ -23,8 +37,9 @@ class Http implements Manager
 
     /**
      * @param string $rootDirectory
+     * @param ParentManager $parent
      */
-    public function __construct(private string $rootDirectory)
+    public function __construct(private string $rootDirectory, private ParentManager $parent)
     {
     }
 
