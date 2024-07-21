@@ -47,13 +47,25 @@ class Setup extends Command
     }
 
     /**
+     * @cli setup:docker
+     * @cliDescription Setup and upgrade the configuration structure and modules inside docker
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function setupDocker(): void
+    {
+        shell("cd {$this->rootDirectory}; php cli.php docker:command setup");
+    }
+
+    /**
      * @cli setup
      * @cliDescription Setup and upgrade the configuration structure and modules
      *
      * @return void
      * @throws Exception
      */
-    public function execute(): void
+    public function setup(): void
     {
         if ($this->modifyComposer()) {
             return;

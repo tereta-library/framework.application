@@ -9,7 +9,7 @@ use Framework\Http\Router as HttpRouter;
 use Framework\Http\Router\Expression as HttpRouterExpression;
 use Framework\Http\Router\Item as HttpRouterItem;
 use Framework\View\Php\Factory as BlockFactory;
-use App\Controller\Error as ControllerError;
+use Framework\Application\Controller\Error as ControllerError;
 use Exception;
 
 /**
@@ -49,7 +49,8 @@ class Http implements Manager
      */
     public function setConfigs(array $configs): void
     {
-        BlockFactory::$themeDirectory = $configs['themeDirectory'] ?? realpath($this->rootDirectory . '/view');
+        $theme = 'base';
+        BlockFactory::$themeDirectory = $configs['themeDirectory'] ?? "{$this->rootDirectory}/app/view/{$theme}";
     }
 
     /**
@@ -71,7 +72,7 @@ class Http implements Manager
         if ($httpRouterExpression) {
             $routerRules[] = $httpRouterExpression;
         }
-        $routerRules[] = new HttpRouterItem('App\Controller\Error->notFound');
+        $routerRules[] = new HttpRouterItem('Framework\Application\Controller\Error->notFound');
 
         $this->router = new HttpRouter($routerRules);
     }

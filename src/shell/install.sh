@@ -28,11 +28,19 @@ chmod 0744 "$rootDir/app/view"
 
 if [ "$1" != "copy" ]; then
   echo "Linking initial files"
+  rm -f "$rootDir/pub/index.php"
+  rm -f "$rootDir/pub/.htaccess"
+  rm -f "$rootDir/cli.php"
+
   ln -s "$rootDir/vendor/tereta/framework.application/src/shell/files/pubIndex.php" "$rootDir/pub/index.php"
   ln -s "$rootDir/vendor/tereta/framework.application/src/shell/files/pubHtaccess" "$rootDir/pub/.htaccess"
   ln -s "$rootDir/vendor/tereta/framework.application/src/shell/files/cli.php" "$rootDir/cli.php"
 else
   echo "Copying initial files"
+  rm -f "$rootDir/pub/index.php"
+  rm -f "$rootDir/pub/.htaccess"
+  rm -f "$rootDir/cli.php"
+
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/pubIndex.php" "$rootDir/pub/index.php"
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/pubHtaccess" "$rootDir/pub/.htaccess"
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/cli.php" "$rootDir/cli.php"

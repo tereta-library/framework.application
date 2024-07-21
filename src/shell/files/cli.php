@@ -1,7 +1,12 @@
 #!/bin/php
 <?php declare(strict_types=1);
 
-$rootDir = realpath(__DIR__ . '/../../../../../..');
+if (str_ends_with(__FILE__, '/framework.application/src/shell/files/cli.php')) {
+    $rootDir = realpath(__DIR__ . '/../../../../../..');
+} else {
+    $rootDir = realpath(__DIR__);
+}
+
 require_once "{$rootDir}/vendor/autoload.php";
 
 use Framework\Application\Manager;
