@@ -39,12 +39,11 @@ class Setup extends Command
     private ?Config $config = null;
 
     /**
-     * @param array $argumentValues
+     *
      */
-    public function __construct(array $argumentValues)
+    public function __construct()
     {
         $this->rootDirectory = realpath(__DIR__ . '/../../../../..');
-        parent::__construct($argumentValues);
     }
 
     /**

@@ -92,7 +92,6 @@ class Cli implements Manager
                 $routerExpression[$variables['cli']] = "{$commandClass}->{$method->getName()}";
             }
         }
-
         $this->router = new CliRouter($routerExpression);
     }
 
