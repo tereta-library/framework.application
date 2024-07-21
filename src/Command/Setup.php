@@ -8,6 +8,7 @@ use Framework\Application\Interface\Module as ModuleInterface;
 use Framework\Helper\Config;
 use Exception;
 use ReflectionClass;
+use ReflectionException;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -27,9 +28,19 @@ use ReflectionClass;
  */
 class Setup extends Command
 {
-    private string $rootDirectory;
+    /**
+     * @var string|false
+     */
+    private string|false $rootDirectory;
+
+    /**
+     * @var Config|null
+     */
     private ?Config $config = null;
 
+    /**
+     * @param array $argumentValues
+     */
     public function __construct(array $argumentValues)
     {
         $this->rootDirectory = realpath(__DIR__ . '/../../../../..');
@@ -49,7 +60,6 @@ class Setup extends Command
             return;
         }
 
-        $modules = require($this->rootDirectory . '/vendor/composer/autoload_psr4.php');
         $modulesDir = $this->rootDirectory . '/app/module';
         if (!is_dir($modulesDir)) {
             throw new Exception(
@@ -64,6 +74,10 @@ class Setup extends Command
         $this->setupModules();
     }
 
+    /**
+     * @return void
+     * @throws ReflectionException
+     */
     private function setupModules(): void
     {
         if ($this->modifyComposer()) {
@@ -130,6 +144,10 @@ class Setup extends Command
         echo static::SYMBOL_COLOR_GREEN. "Modules successfully initialized.\n" . static::SYMBOL_COLOR_RESET;
     }
 
+    /**
+     * @param array $values
+     * @return array
+     */
     private function pathPrepare(array $values): array
     {
         foreach ($values as $key => $item) {
