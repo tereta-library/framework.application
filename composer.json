@@ -13,13 +13,13 @@
         }
     ],
     "require": {
-        "tereta/framework.config": "^0.0.10",
-        "tereta/framework.process": "^0.0.10",
-        "tereta/framework.controller": "^0.0.10",
-        "tereta/framework.http": "^0.0.10",
-        "tereta/framework.view": "^0.0.10",
-        "tereta/framework.cli": "^0.0.10",
-        "tereta/framework.docker": "^0.0.10",
-        "tereta/framework.helper": "^0.0.10"
+        "tereta/framework.config": "^0.0.11",
+        "tereta/framework.process": "^0.0.11",
+        "tereta/framework.controller": "^0.0.11",
+        "tereta/framework.http": "^0.0.11",
+        "tereta/framework.view": "^0.0.11",
+        "tereta/framework.cli": "^0.0.11",
+        "tereta/framework.docker": "^0.0.11",
+        "tereta/framework.helper": "^0.0.11"
     }
 }

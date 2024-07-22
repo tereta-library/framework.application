@@ -26,7 +26,7 @@ chmod 0744 "$rootDir/app/etc"
 mkdir -p "$rootDir/app/view"
 chmod 0744 "$rootDir/app/view"
 
-if [ "$1" != "copy" ]; then
+if [ "$1" == "link" ]; then
   echo "Linking initial files"
   rm -f "$rootDir/pub/index.php"
   rm -f "$rootDir/pub/.htaccess"
@@ -45,3 +45,5 @@ else
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/pubHtaccess" "$rootDir/pub/.htaccess"
   cp "$rootDir/vendor/tereta/framework.application/src/shell/files/cli.php" "$rootDir/cli.php"
 fi
+
+echo "Finished."

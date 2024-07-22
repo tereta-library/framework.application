@@ -2,13 +2,14 @@
 
 namespace Framework\Application\Command;
 
-use Framework\Cli\Abstract\Command;
+use Framework\Cli\Interface\Controller;
 use Framework\Helper\File;
 use Framework\Application\Interface\Module as ModuleInterface;
 use Framework\Helper\Config;
 use Exception;
 use ReflectionClass;
 use ReflectionException;
+use Framework\Cli\Symbol;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -26,7 +27,7 @@ use ReflectionException;
  * @link https://tereta.dev
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  */
-class Setup extends Command
+class Setup implements Controller
 {
     /**
      * @var string|false
@@ -44,18 +45,6 @@ class Setup extends Command
     public function __construct()
     {
         $this->rootDirectory = realpath(__DIR__ . '/../../../../..');
-    }
-
-    /**
-     * @cli setup:docker
-     * @cliDescription Setup and upgrade the configuration structure and modules inside docker
-     *
-     * @return void
-     * @throws Exception
-     */
-    public function setupDocker(): void
-    {
-        shell("cd {$this->rootDirectory}; php cli.php docker:command setup");
     }
 
     /**
@@ -79,8 +68,8 @@ class Setup extends Command
             );
         }
 
-        echo static::SYMBOL_COLOR_GREEN . "Setup modules.\n" . static::SYMBOL_COLOR_RESET;
-        echo static::SYMBOL_COLOR_GREEN . "Initialising modules.\n" . static::SYMBOL_COLOR_RESET;
+        echo Symbol::COLOR_GREEN . "Setup modules.\n" . Symbol::COLOR_RESET;
+        echo Symbol::COLOR_GREEN . "Initialising modules.\n" . Symbol::COLOR_RESET;
 
         $this->setupModules();
     }
@@ -104,8 +93,8 @@ class Setup extends Command
             );
         }
 
-        echo static::SYMBOL_COLOR_GREEN . "Setup modules.\n" . static::SYMBOL_COLOR_RESET;
-        echo static::SYMBOL_COLOR_GREEN. "Initialising modules.\n" . static::SYMBOL_COLOR_RESET;
+        echo Symbol::COLOR_GREEN . "Setup modules.\n" . Symbol::COLOR_RESET;
+        echo Symbol::COLOR_GREEN. "Initialising modules.\n" . Symbol::COLOR_RESET;
 
         $files = File::getFiles($modulesDir, '/.*\/.*\/Module.php/Usi');
         $activeModules = [];
@@ -141,7 +130,7 @@ class Setup extends Command
                 $isActive = false;
             }
 
-            echo Command::SYMBOL_COLOR_WHITE . "Module {$namespace} found: " . ($isActive ? "[Enabled]" : "[Disabled]") . ".\n" . Command::SYMBOL_COLOR_RESET;
+            echo Symbol::COLOR_WHITE . "Module {$namespace} found: " . ($isActive ? "[Enabled]" : "[Disabled]") . ".\n" . Symbol::COLOR_RESET;
 
             $activeModules[$namespace] = [
                 'enabled' => $isActive,
@@ -152,7 +141,7 @@ class Setup extends Command
         $this->config = (new Config('php', $activeModules))
             ->save($this->rootDirectory . '/app/etc/modules.php');
 
-        echo static::SYMBOL_COLOR_GREEN. "Modules successfully initialized.\n" . static::SYMBOL_COLOR_RESET;
+        echo Symbol::COLOR_GREEN. "Modules successfully initialized.\n" . Symbol::COLOR_RESET;
     }
 
     /**

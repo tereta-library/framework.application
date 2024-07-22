@@ -7,7 +7,6 @@ use Framework\Cli\Router as CliRouter;
 use Framework\Helper\File;
 use Framework\Application\Manager as ParentManager;
 use ReflectionClass;
-use Framework\Cli\Abstract\Command as AbstractCommand;
 use Framework\Helper\PhpDoc;
 use ReflectionException;
 use Exception;
@@ -74,11 +73,7 @@ class Cli implements Manager
             }
         }
 
-        $initialMethods = [];
-        foreach ((new ReflectionClass(AbstractCommand::class))->getMethods() as $method) {
-            if (!$method->isPublic()) continue;
-            $initialMethods[] = $method->getName();
-        }
+        $initialMethods = ['__construct'];
 
         foreach ($commandClasses as $commandClass) {
             $commandClassReflection = new ReflectionClass($commandClass);
