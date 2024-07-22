@@ -83,11 +83,35 @@ class Http implements Manager
     public function run(): void
     {
         try {
-            echo (new ControllerAction)->runAction(
+            echo $this->runAction(
                 $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'])
             );
         } catch (Exception $e) {
             echo (new ControllerError)->fatal($e);
         }
+    }
+
+    /**
+     * @param string $action
+     * @return mixed
+     * @throws Exception
+     */
+    private function runAction(string $action): mixed
+    {
+        $controllerAction = explode('->', $action);
+        $controller = array_shift($controllerAction);
+        $action = array_shift($controllerAction);
+
+        $reflectionClass = new ReflectionClass($controller);
+        if (!$reflectionClass->hasMethod($action)) {
+            throw new Exception("The action method \"$action\" not found in the $controller class");
+        }
+
+        $instance = $reflectionClass->newInstance();
+
+        $reflectionMethod = new ReflectionMethod($controller, $action);
+        $reflectionMethod->isPublic() || throw new Exception("The action method \"$action\" should be public");
+
+        return $reflectionMethod->invoke($instance);
     }
 }
