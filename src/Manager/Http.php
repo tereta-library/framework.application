@@ -5,12 +5,20 @@ namespace Framework\Application\Manager;
 use Framework\Application\Interface\Manager;
 use Framework\Application\Manager as ParentManager;
 use Framework\Controller\Action as ControllerAction;
+use Framework\Helper\File;
 use Framework\Http\Router as HttpRouter;
 use Framework\Http\Router\Expression as HttpRouterExpression;
 use Framework\Http\Router\Item as HttpRouterItem;
+use Framework\Http\Router\Action;
 use Framework\View\Php\Factory as BlockFactory;
 use Framework\Application\Controller\Error as ControllerError;
 use Exception;
+use ReflectionClass;
+use ReflectionMethod;
+use Framework\Http\Interface\Router as RouterInterface;
+use Framework\Helper\PhpDoc;
+use ReflectionException;
+use Framework\Http\Interface\Controller;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -30,6 +38,11 @@ use Exception;
  */
 class Http implements Manager
 {
+    /**
+     * @var array|null $routerTypes
+     */
+    private ?array $routerTypes = null;
+
     /**
      * @var HttpRouter|null
      */
@@ -59,22 +72,147 @@ class Http implements Manager
      */
     public function setRouter(array $routerExpression = []): void
     {
-        $httpRouterExpression = null;
-        if ($routerExpression) {
-            $httpRouterExpression = new HttpRouterExpression;
+        $routerConfigs = $this->getControllerRouterRules();
+
+        foreach ($routerConfigs as $router) {
+            $params = $this->splitParams($router['route']);
+            $routeIdentifier = array_shift($params);
+            $routerRules[] = $this->createRouterType($routeIdentifier, $router['action'], $params);
         }
 
-        foreach ($routerExpression as $path => $action) {
-            $httpRouterExpression->add(HttpRouterExpression::METHOD_GET, $path, $action);
-        }
-
-        $routerRules = [];
-        if ($httpRouterExpression) {
-            $routerRules[] = $httpRouterExpression;
-        }
         $routerRules[] = new HttpRouterItem('Framework\Application\Controller\Error->notFound');
 
         $this->router = new HttpRouter($routerRules);
+    }
+
+    private function splitParams(string $route, &$params = []): array
+    {
+        $route = trim($route);
+        if (substr($route, 0, 1) === '"') {
+            $delimiterSign = '"';
+            $route = substr($route, 1);
+        } else {
+            $delimiterSign = ' ';
+        }
+
+        $offset = 0;
+        while (true) {
+            $delimiter = strpos($route, $delimiterSign, $offset);
+            $escapeCount = 0;
+            while (substr($route, $delimiter - 1 - $escapeCount, 1) === '\\') {
+                $escapeCount++;
+            }
+
+            if ($escapeCount % 2 === 0) {
+                break;
+            }
+
+            $offset = $delimiter + 1;
+        }
+
+        if ($delimiter === false) {
+            $params[] = $route;
+            return $params;
+        }
+
+        $paramItem = substr($route, 0, $delimiter);
+        if ($delimiterSign === '"') {
+            $paramItem = str_replace("\\\\", "\\", $paramItem);
+            $paramItem = str_replace("\\\"", "\"", $paramItem);
+        }
+        $params[] = $paramItem;
+
+        $this->splitParams(substr($route, $delimiter + 1), $params);
+
+        return $params;
+    }
+
+    private function getControllerRouterRules(): array
+    {
+        $controller = [];
+        $action = [];
+
+        foreach ($this->parent->getActiveModules() as $module => $path) {
+            $rootDirectory = $this->parent::getRootDirectory();
+            $files = File::getFiles("{$rootDirectory}/{$path}/Controller", '/.*\.php/Usi');
+
+            foreach ($files as $file) {
+                $controllerItem = "{$module}\\Controller\\" . substr(str_replace('/', '\\', $file), 0, -4);
+
+                $reflectionClass = new ReflectionClass($controllerItem);
+                if (!$reflectionClass->implementsInterface(Controller::class)) continue;
+
+                $controller[] = $reflectionClass;
+            }
+        }
+
+        foreach ($controller as $item) {
+            foreach ($item->getMethods() as $reflectionMethod) {
+                if (!$reflectionMethod->isPublic()) continue;
+
+                $variables = PhpDoc::getMethodVariables($item->name, $reflectionMethod->name);
+                if (!isset($variables['router']) || !$variables['router']) continue;
+
+                $action[] = [
+                    'route' => $variables['router'],
+                    'action' => $item->name . '->' . $reflectionMethod->name,
+                ];
+            }
+        }
+
+        return $action;
+    }
+
+    /**
+     * @param string $routerType
+     * @param string $action
+     * @param array $params
+     * @return string
+     * @throws ReflectionException
+     */
+    private function createRouterType(string $routerType, string $action, array $params): RouterInterface
+    {
+        $routerTypes = $this->getRouterTypes();
+        if (!isset($routerTypes[$routerType])) {
+            throw new Exception("The router type \"$routerType\" not found");
+        }
+
+        $class = $routerTypes[$routerType];
+
+        return new $class($action, $params);
+    }
+
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    private function getRouterTypes(): array
+    {
+        if (is_array($this->routerTypes)) {
+            return $this->routerTypes;
+        }
+
+        $routerClasses = [];
+        $routerMap = [];
+
+        foreach ($this->parent->getActiveModules() as $module => $path) {
+            $rootDirectory = $this->parent::getRootDirectory();
+            $files = File::getFiles("{$rootDirectory}/{$path}/Router", '/.*\.php/Usi');
+
+            foreach ($files as $file) {
+                $routerClasses[] = "{$module}\\Router\\" . substr(str_replace('/', '\\', $file), 0, -4);
+            }
+        }
+
+        foreach ($routerClasses as $routerClass) {
+            $reflectionClass = new ReflectionClass($routerClass);
+            if (!$reflectionClass->implementsInterface(RouterInterface::class)) continue;
+            if (!$routerClass::ROUTER) continue;
+
+            $routerMap[$routerClass::ROUTER] = $routerClass;
+        }
+
+        return $this->routerTypes = $routerMap;
     }
 
     /**
@@ -92,13 +230,13 @@ class Http implements Manager
     }
 
     /**
-     * @param string $action
+     * @param Action|null $action
      * @return mixed
-     * @throws Exception
+     * @throws ReflectionException
      */
-    private function runAction(string $action): mixed
+    private function runAction(?Action $actionClass): mixed
     {
-        $controllerAction = explode('->', $action);
+        $controllerAction = explode('->', $actionClass->getAction());
         $controller = array_shift($controllerAction);
         $action = array_shift($controllerAction);
 
@@ -112,6 +250,6 @@ class Http implements Manager
         $reflectionMethod = new ReflectionMethod($controller, $action);
         $reflectionMethod->isPublic() || throw new Exception("The action method \"$action\" should be public");
 
-        return $reflectionMethod->invoke($instance);
+        return $reflectionMethod->invokeArgs($instance, $actionClass->getParams());
     }
 }
