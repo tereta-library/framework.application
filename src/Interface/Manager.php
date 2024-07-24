@@ -3,6 +3,7 @@
 namespace Framework\Application\Interface;
 
 use Framework\Application\Manager as ParentManager;
+use Framework\Helper\Config;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -29,10 +30,10 @@ interface Manager
     public function __construct(string $rootDirectory, ParentManager $parent);
 
     /**
-     * @param array $configs
+     * @param Config $config
      * @return void
      */
-    public function setConfigs(array $configs): void;
+    public function setConfig(Config $config): void;
 
     /**
      * @param array $routerExpression

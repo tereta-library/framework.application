@@ -4,6 +4,7 @@ namespace Framework\Application\Manager;
 
 use Framework\Application\Interface\Manager;
 use Framework\Cli\Router as CliRouter;
+use Framework\Helper\Config;
 use Framework\Helper\File;
 use Framework\Application\Manager as ParentManager;
 use ReflectionClass;
@@ -43,10 +44,10 @@ class Cli implements Manager
     }
 
     /**
-     * @param array $configs
+     * @param Config $config
      * @return void
      */
-    public function setConfigs(array $configs): void
+    public function setConfig(Config $config): void
     {
     }
 

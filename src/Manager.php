@@ -3,10 +3,9 @@
 namespace Framework\Application;
 
 use Framework\Application\Interface\Manager as InterfaceManager;
-use Framework\Config\Singleton as Config;
-use Framework\Process\Facade as ProcessFacade;
 use ReflectionException;
 use Exception;
+use Framework\Helper\Config;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -54,7 +53,9 @@ class Manager
     /**
      * @var InterfaceManager
      */
-    private InterfaceManager $managerType;
+    private InterfaceManager $adapter;
+
+    private ?Config $config = null;
 
     /**
      * @param string $rootDirectory
@@ -77,7 +78,7 @@ class Manager
             throw new Exception("The application manager type should implement " . InterfaceManager::class);
         }
 
-        $this->managerType = $manager;
+        $this->adapter = $manager;
     }
 
     /**
@@ -101,24 +102,46 @@ class Manager
     }
 
     /**
-     * @param array $configs
      * @return $this
-     * @throws ReflectionException
      */
-    public function setConfigs(array $configs = []): static
+    public static function instance(): static
+    {
+        return static::$instance;
+    }
+
+    /**
+     * It is proxy for manager types http and cli
+     *
+     * @param array $config
+     * @return $this
+     * @throws Exception
+     */
+    public function setConfig(array $config = []): static
     {
         $this->isConfigured = true;
 
-        Config::singleton()->addDirectory(
-            $configs['configDirectory'] ?? realpath(static::$rootDirectory . '/app/etc')
-        );
-        ProcessFacade::setPidDirectory(
-            $configs['pidsDirectory'] ?? static::$rootDirectory . '/var/pids'
-        );
+        $configDirectory = $config['configDirectory'] ?? realpath(static::$rootDirectory . '/app/etc');
+        $this->config = (new Config('php', $config))->load(static::$rootDirectory . "/{$configDirectory}/config.php");
 
-        $this->managerType->setConfigs($configs);
+        $this->adapter->setConfig($this->config);
 
         return $this;
+    }
+
+    /**
+     * @return InterfaceManager
+     */
+    public function getAdapter(): InterfaceManager
+    {
+        return $this->adapter;
+    }
+
+    /**
+     * @return Config
+     */
+    public function getConfig(): Config
+    {
+        return $this->config;
     }
 
     /**
@@ -154,24 +177,24 @@ class Manager
     {
         $this->isRouterConfigured = true;
 
-        $this->managerType->setRouter($routerExpression, $configurator);
+        $this->adapter->setRouter($routerExpression, $configurator);
         return $this;
     }
 
     /**
      * @return void
-     * @throws ReflectionException
+     * @throws Exception
      */
     public function run(): void
     {
         if (!$this->isConfigured) {
-            $this->setConfigs();
+            $this->setConfig();
         }
 
         if (!$this->isRouterConfigured) {
             $this->setRouter();
         }
 
-        $this->managerType->run();
+        $this->adapter->run();
     }
 }

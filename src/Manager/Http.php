@@ -5,12 +5,11 @@ namespace Framework\Application\Manager;
 use Framework\Application\Interface\Manager;
 use Framework\Application\Manager as ParentManager;
 use Framework\Controller\Action as ControllerAction;
+use Framework\Helper\Config;
 use Framework\Helper\File;
 use Framework\Http\Router as HttpRouter;
-use Framework\Http\Router\Expression as HttpRouterExpression;
 use Framework\Http\Router\Item as HttpRouterItem;
 use Framework\Http\Router\Action;
-use Framework\View\Php\Factory as BlockFactory;
 use Framework\Application\Controller\Error as ControllerError;
 use Exception;
 use ReflectionClass;
@@ -19,6 +18,7 @@ use Framework\Http\Interface\Router as RouterInterface;
 use Framework\Helper\PhpDoc;
 use ReflectionException;
 use Framework\Http\Interface\Controller;
+use Framework\View\Html;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -39,6 +39,11 @@ use Framework\Http\Interface\Controller;
 class Http implements Manager
 {
     /**
+     * @var Html|null $view
+     */
+    public ?Html $view = null;
+
+    /**
      * @var array|null $routerTypes
      */
     private ?array $routerTypes = null;
@@ -57,18 +62,31 @@ class Http implements Manager
     }
 
     /**
-     * @param array $configs
+     * @param Config $config
      * @return void
      */
-    public function setConfigs(array $configs): void
+    public function setConfig(Config $config): void
     {
-        $theme = 'base';
-        BlockFactory::$themeDirectory = $configs['themeDirectory'] ?? "{$this->rootDirectory}/app/view/{$theme}";
+        $config->set(
+            'themeDirectory',
+            $config->get('themeDirectory') ?? "{$this->rootDirectory}/app/view"
+        )->set('theme', 'base');
+
+        $this->view = new Html("{$config->get('themeDirectory')}/{$config->get('theme')}");
+    }
+
+    /**
+     * @return Html|null
+     */
+    public function getView(): ?Html
+    {
+        return $this->view;
     }
 
     /**
      * @param array $routerExpression
      * @return void
+     * @throws ReflectionException
      */
     public function setRouter(array $routerExpression = []): void
     {
@@ -85,7 +103,12 @@ class Http implements Manager
         $this->router = new HttpRouter($routerRules);
     }
 
-    private function splitParams(string $route, &$params = []): array
+    /**
+     * @param string $route
+     * @param array $params
+     * @return array
+     */
+    private function splitParams(string $route, array &$params = []): array
     {
         $route = trim($route);
         if (substr($route, 0, 1) === '"') {
@@ -127,6 +150,10 @@ class Http implements Manager
         return $params;
     }
 
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
     private function getControllerRouterRules(): array
     {
         $controller = [];
@@ -230,7 +257,7 @@ class Http implements Manager
     }
 
     /**
-     * @param Action|null $action
+     * @param Action|null $actionClass
      * @return mixed
      * @throws ReflectionException
      */

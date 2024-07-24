@@ -13,7 +13,6 @@
         }
     ],
     "require": {
-        "tereta/framework.config": "^0.0.15",
         "tereta/framework.process": "^0.0.15",
         "tereta/framework.http": "^0.0.15",
         "tereta/framework.view": "^0.0.15",
