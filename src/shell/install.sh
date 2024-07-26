@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rootDir=$(realpath "$(dirname "$0")/../../../../..")
+rootDir=$(cd "$(dirname "$0")/../../../../.." && pwd)
 
 echo "Root directory is: $rootDir"
 echo "Creating initial directories"
