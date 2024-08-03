@@ -2,6 +2,7 @@
 
 namespace Framework\Application\Controller;
 
+use Framework\Application\Manager;
 use Framework\View\Php\Factory as BlockFactory;
 use Framework\View\Php\Template;
 use Exception;
@@ -27,6 +28,16 @@ class Error
     public function notFound(): string
     {
         header('HTTP/1.0 404 Not Found');
+
+        $view = Manager::instance()->getView();
+
+        try {
+            $view->initialize('404');
+            $content = $view->getNodeById('content');
+            return (string) $view->render();
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
 
         $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
 
