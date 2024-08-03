@@ -31,52 +31,41 @@ class Error
 
         $view = Manager::instance()->getView();
 
+        $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
+
         try {
-            $view->initialize('404');
-            $content = $view->getNodeById('content');
-            return (string) $view->render();
+            $view->initialize('error')
+                ->getBlockById('content')
+                ->assign('title', '404 Not Found')
+                ->assign('code', 404)
+                ->assign('method', $_SERVER['REQUEST_METHOD'])
+                ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}");
+            return $view->render();
         } catch (Exception $e) {
             return $e->getMessage();
         }
-
-        $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
-
-        return (string) (new BlockFactory())->create(
-            Template::class, [
-                'title' => '404 Not Found',
-                'content' => (new BlockFactory())->create(
-                    Template::class, [
-                        'code' => '404',
-                        'message' => '404 Not Found',
-                        'method' => $_SERVER['REQUEST_METHOD'],
-                        'url' => "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}"
-                    ]
-                )->setTemplate('error.phtml')
-            ]
-        )->setTemplate('root.phtml');
     }
 
     public function fatal(?Exception $e = null): string
     {
         header('HTTP/1.1 500');
 
+        $view = Manager::instance()->getView();
+
         $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
 
-        return (string) (new BlockFactory())->create(
-            Template::class, [
-                'title' => '500 Fatal Error',
-                'content' => (new BlockFactory())->create(
-                    Template::class, [
-                        'code' => '500',
-                        'message' => $e ? $e->getMessage() : '500 Fatal Error',
-                        'method' => $_SERVER['REQUEST_METHOD'],
-                        'url' => "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}",
-                        'file' => $e ? $e->getFile() : null,
-                        'line' => $e ? $e->getLine() : null,
-                        'backtrace' => $e ? $e->getTraceAsString() : null
-                    ]
-                )->setTemplate('error.phtml')
-            ]
-        )->setTemplate('root.phtml');
+        try {
+            $view->initialize('error')
+                ->getBlockById('content')
+                ->assign('title', '500 Fatal Error')
+                ->assign('code', 500)
+                ->assign('method', $_SERVER['REQUEST_METHOD'])
+                ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}")
+                //->assign('message', $e->getMessage())
+                ->assign('backTrace', $e->getTraceAsString());
+            return $view->render();
+        } catch (Exception $e) {
+            return $e->getMessage();
+        }
     }
 }

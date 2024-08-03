@@ -9,10 +9,4 @@ use Framework\View\Php\Template;
  */
 class Error extends Template
 {
-    public function render(): string
-    {
-        $this->assign('title', '404 Not Found');
-
-        return parent::render();
-    }
 }
