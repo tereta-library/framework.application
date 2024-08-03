@@ -61,7 +61,7 @@ class Error
                 ->assign('code', 500)
                 ->assign('method', $_SERVER['REQUEST_METHOD'])
                 ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}")
-                //->assign('message', $e->getMessage())
+                ->assign('message', $e->getMessage())
                 ->assign('backTrace', $e->getTraceAsString());
             return $view->render();
         } catch (Exception $e) {

@@ -9,4 +9,9 @@ use Framework\View\Php\Template;
  */
 class Error extends Template
 {
+    protected function construct(): void
+    {
+        $this->assign('title')->assign('code')->assign('method')->assign('url')
+            ->assign('message')->assign('backTrace');
+    }
 }
