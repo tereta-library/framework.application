@@ -54,6 +54,11 @@ class Http implements Manager
     private ?HttpRouter $router = null;
 
     /**
+     * @var Config|null $config
+     */
+    private ?Config $config = null;
+
+    /**
      * @param string $rootDirectory
      * @param ParentManager $parent
      */
@@ -67,6 +72,7 @@ class Http implements Manager
      */
     public function setConfig(Config $config): void
     {
+        $this->config = $config;
         $config->set(
             'themeDirectory',
             $config->get('themeDirectory') ?? "{$this->rootDirectory}/app/view"
@@ -74,10 +80,12 @@ class Http implements Manager
         $config->set('varDirectory', "{$this->rootDirectory}/var");
         $config->set('generatedDirectory', "{$this->rootDirectory}/generated");
         $config->set('theme', 'base');
+        $config->set('themeDirectory', "{$config->get('themeDirectory')}/{$config->get('theme')}/html");
+        $config->set('generatedThemeDirectory', "{$config->get('generatedDirectory')}/{$config->get('theme')}/html");
 
         $this->view = new Html(
-            "{$config->get('themeDirectory')}/{$config->get('theme')}",
-            "{$config->get('generatedDirectory')}/{$config->get('theme')}"
+            $config->get('themeDirectory'),
+            $config->get('generatedThemeDirectory')
         );
     }
 
@@ -248,18 +256,67 @@ class Http implements Manager
         return $this->routerTypes = $routerMap;
     }
 
+     const RESOURCE_PREFIX = '/resource/';
+
     /**
      * @return void
      */
     public function run(): void
     {
         try {
+            if ($this->mapResource($_SERVER['REQUEST_URI'])) {
+                return;
+            }
+
             echo $this->runAction(
                 $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'])
             );
         } catch (Exception $e) {
             echo (new ControllerError)->fatal($e);
         }
+    }
+
+    /**
+     * @param string $requestUri
+     * @return bool
+     */
+    private function mapResource(string $requestUri): bool
+    {
+        if (!str_starts_with($requestUri, static::RESOURCE_PREFIX)) {
+            return false;
+        }
+
+        $resourcePrefix = trim(static::RESOURCE_PREFIX, '/');
+        $parsedUri = parse_url($requestUri);
+        $resourceUri = substr($parsedUri['path'], strlen(static::RESOURCE_PREFIX));
+        $sourceFile = "{$this->rootDirectory}/app/view/{$resourceUri}";
+        $publishThemeDir = "{$this->rootDirectory}/pub/{$resourcePrefix}";
+        $publishFile = "{$publishThemeDir}/{$resourceUri}";
+        $publishFileDir = dirname($publishFile);
+
+        if (!is_file($sourceFile)) {
+            header("HTTP/1.0 404 Not Found");
+            return true;
+        }
+
+        if (!is_dir($publishFileDir)) {
+            @mkdir($publishFileDir, 0777, true);
+        }
+
+        if (!file_exists($publishFile)) {
+            symlink($sourceFile, $publishFile);
+        }
+
+        $contentType = mime_content_type($publishFile);
+        switch (pathinfo($publishFile, PATHINFO_EXTENSION)) {
+            case('css'):
+                $contentType = 'text/css';
+                break;
+        }
+
+        header("Content-Type: " . $contentType);
+        readfile($publishFile);
+        return true;
     }
 
     /**

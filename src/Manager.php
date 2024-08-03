@@ -6,6 +6,7 @@ use Framework\Application\Interface\Manager as InterfaceManager;
 use ReflectionException;
 use Exception;
 use Framework\Helper\Config;
+use Framework\View\Html as ViewHtml;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -134,6 +135,14 @@ class Manager
     public function getAdapter(): InterfaceManager
     {
         return $this->adapter;
+    }
+
+    /**
+     * @return ViewHtml
+     */
+    public function getView(): ViewHtml
+    {
+        return $this->adapter->getView();
     }
 
     /**
