@@ -4,7 +4,7 @@ namespace Framework\Application\Controller;
 
 use Framework\Helper\PhpDoc;
 use Framework\Http\Interface\Controller;
-use Framework\Api\Builder as ApiBuilder;
+use Framework\Api\Factory as ApiFactory;
 use Exception;
 use Framework\Application\Manager;
 use ReflectionClass;
@@ -32,7 +32,7 @@ use Framework\Api\Interface\Api as ApiInterface;
 class Api implements Controller
 {
     /**
-     * @router expression ANY /^\/api\/(\w+)\/(.*)$/Usi
+     * @router expression ANY /^\/api\/(\w+)\/(.*)(\?.*)?$/Usi
      * @param string $format
      * @param string $identifier
      * @return string
@@ -43,7 +43,7 @@ class Api implements Controller
         $apiSourceList = [];
         $apiList = [];
         $payload = file_get_contents('php://input');
-        $apiSpecification = (new ApiBuilder())->create($format);
+        $apiSpecification = (new ApiFactory())->create($format);
         $input = $apiSpecification->decode($payload);
 
         $classList = Manager::instance()->getClassByExpression('/^Api\/.*\.php$/Usi');
@@ -74,7 +74,18 @@ class Api implements Controller
 
             $apiClassReflection = $apiList[$identifier]['class'];
             $apiMethodReflection = $apiList[$identifier]['method'];
-            $output = $apiMethodReflection->invoke($apiClassReflection->newInstance());
+
+            $apiMethodParametersReflection = $apiMethodReflection->getParameters();
+            $inputType = null;
+            if (count($apiMethodParametersReflection) >= 1) {
+                $inputType = $apiMethodParametersReflection[0]->getType()->getName();
+            }
+
+            if ($inputType && $inputType != gettype($input)) {
+                throw new Exception("The input type must be \"{$inputType}\"", 500);
+            }
+
+            $output = $apiMethodReflection->invoke($apiClassReflection->newInstance(), $input);
         } catch (Exception $e) {
             return $apiSpecification->encode([
                 'error' => $e->getMessage(),
