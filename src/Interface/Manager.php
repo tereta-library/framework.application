@@ -19,7 +19,10 @@ use Framework\Helper\Config;
  * @interface Framework\Application\Interface\Manager
  * @package Framework\Application\Interface
  * @link https://tereta.dev
+ * @since 2020-2024
+ * @license   http://www.apache.org/licenses/LICENSE-2.0  Apache License 2.0
  * @author Tereta Alexander <tereta.alexander@gmail.com>
+ * @copyright 2020-2024 Tereta Alexander
  */
 interface Manager
 {
