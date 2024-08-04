@@ -312,6 +312,9 @@ class Http implements Manager
             case('css'):
                 $contentType = 'text/css';
                 break;
+            case('js'):
+                $contentType = 'text/javascript';
+                break;
         }
 
         header("Content-Type: " . $contentType);
