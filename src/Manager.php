@@ -3,7 +3,6 @@
 namespace Framework\Application;
 
 use Framework\Application\Interface\Manager as InterfaceManager;
-use ReflectionException;
 use Exception;
 use Framework\Helper\Config;
 use Framework\View\Html as ViewHtml;
@@ -162,7 +161,7 @@ class Manager
             return $this->activeModules;
         }
 
-        $configModules = (new \Framework\Helper\Config('php'))
+        $configModules = (new Config('php'))
             ->load(static::$rootDirectory . '/app/etc/modules.php');
 
         $this->activeModules = [];

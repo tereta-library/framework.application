@@ -80,8 +80,8 @@ class Http implements Manager
         $config->set('varDirectory', "{$this->rootDirectory}/var");
         $config->set('generatedDirectory', "{$this->rootDirectory}/generated");
         $config->set('theme', 'base');
-        $config->set('themeDirectory', "{$config->get('themeDirectory')}/{$config->get('theme')}/html");
-        $config->set('generatedThemeDirectory', "{$config->get('generatedDirectory')}/{$config->get('theme')}/html");
+        $config->set('themeDirectory', "{$config->get('themeDirectory')}/{$config->get('theme')}/layout");
+        $config->set('generatedThemeDirectory', "{$config->get('generatedDirectory')}/{$config->get('theme')}/layout");
 
         $this->view = new Html(
             $config->get('themeDirectory'),
