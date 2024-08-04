@@ -3,8 +3,6 @@
 namespace Framework\Application\Controller;
 
 use Framework\Application\Manager;
-use Framework\View\Php\Factory as BlockFactory;
-use Framework\View\Php\Template;
 use Exception;
 
 /**

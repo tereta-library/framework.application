@@ -38,6 +38,8 @@ use Framework\View\Html;
  */
 class Http implements Manager
 {
+    const RESOURCE_PREFIX = '/resource/';
+
     /**
      * @var Html|null $view
      */
@@ -173,18 +175,11 @@ class Http implements Manager
         $controller = [];
         $action = [];
 
-        foreach ($this->parent->getActiveModules() as $module => $path) {
-            $rootDirectory = $this->parent::getRootDirectory();
-            $files = File::getFiles("{$rootDirectory}/{$path}/Controller", '/.*\.php/Usi');
+        foreach($this->parent->getClassByExpression('/^Controller\/.*\.php$/Usi') as $item) {
+            $reflectionClass = new ReflectionClass($item);
+            if (!$reflectionClass->implementsInterface(Controller::class)) continue;
 
-            foreach ($files as $file) {
-                $controllerItem = "{$module}\\Controller\\" . substr(str_replace('/', '\\', $file), 0, -4);
-
-                $reflectionClass = new ReflectionClass($controllerItem);
-                if (!$reflectionClass->implementsInterface(Controller::class)) continue;
-
-                $controller[] = $reflectionClass;
-            }
+            $controller[] = $reflectionClass;
         }
 
         foreach ($controller as $item) {
@@ -208,7 +203,7 @@ class Http implements Manager
      * @param string $routerType
      * @param string $action
      * @param array $params
-     * @return string
+     * @return RouterInterface
      * @throws ReflectionException
      */
     private function createRouterType(string $routerType, string $action, array $params): RouterInterface
@@ -255,8 +250,6 @@ class Http implements Manager
 
         return $this->routerTypes = $routerMap;
     }
-
-     const RESOURCE_PREFIX = '/resource/';
 
     /**
      * @return void

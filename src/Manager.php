@@ -5,6 +5,8 @@ namespace Framework\Application;
 use Framework\Application\Interface\Manager as InterfaceManager;
 use Exception;
 use Framework\Helper\Config;
+use Framework\Helper\File;
+use Framework\Http\Interface\Controller;
 use Framework\View\Html as ViewHtml;
 
 /**
@@ -174,6 +176,28 @@ class Manager
         }
 
         return $this->activeModules;
+    }
+
+    /**
+     * @param string $expression
+     * @return array
+     */
+    public function getClassByExpression(string $expression): array
+    {
+        $return = [];
+
+        foreach ($this->getActiveModules() as $module => $path) {
+            $rootDirectory = static::getRootDirectory();
+            $files = File::getFiles("{$rootDirectory}/{$path}/", $expression);
+
+            foreach ($files as $file) {
+                $classItem = "{$module}\\" . substr(str_replace('/', '\\', $file), 0, -4);
+
+                $return[] = $classItem;
+            }
+        }
+
+        return $return;
     }
 
     /**
