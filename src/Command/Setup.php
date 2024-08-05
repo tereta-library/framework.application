@@ -10,6 +10,7 @@ use Exception;
 use ReflectionClass;
 use ReflectionException;
 use Framework\Cli\Symbol;
+use Framework\Application\Manager;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -47,7 +48,7 @@ class Setup implements Controller
      */
     public function __construct()
     {
-        $this->rootDirectory = realpath(__DIR__ . '/../../../../..');
+        $this->rootDirectory = Manager::getRootDirectory();
     }
 
     /**

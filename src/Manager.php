@@ -6,8 +6,8 @@ use Framework\Application\Interface\Manager as InterfaceManager;
 use Exception;
 use Framework\Helper\Config;
 use Framework\Helper\File;
-use Framework\Http\Interface\Controller;
 use Framework\View\Html as ViewHtml;
+use Framework\Database\Singleton;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -126,11 +126,31 @@ class Manager
         $this->isConfigured = true;
 
         $configDirectory = $config['configDirectory'] ?? realpath(static::$rootDirectory . '/app/etc');
-        $this->config = (new Config('php', $config))->load(static::$rootDirectory . "/{$configDirectory}/config.php");
+        $this->config = (new Config('php', $config))->load("{$configDirectory}/config.php");
+
+        $this->setConfigConnection();
 
         $this->adapter->setConfig($this->config);
-
         return $this;
+    }
+
+    /**
+     * @return void
+     */
+    private function setConfigConnection(): void
+    {
+        $dbConnections = $this->config->get('db');
+        foreach ($dbConnections as $name => $item) {
+            $host = $this->config->get("db.{$name}.host");
+            $user = $this->config->get("db.{$name}.user");
+            $password = $this->config->get("db.{$name}.password");
+            Singleton::createConnection(
+                $host ?? '127.0.0.1',
+                $user ?? 'developer',
+                $password ?? 'developer',
+                $name
+            );
+        }
     }
 
     /**
