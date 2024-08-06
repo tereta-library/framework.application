@@ -14,7 +14,7 @@ use Framework\Cli\Symbol;
 
 try {
     Manager::init($rootDir, 'cli')->setRouter([
-        'setup' => 'Framework\Application\Command\Setup->execute'
+        'setup' => 'Framework\Application\Command\Setup->setup'
     ], true)->run();
 } catch (Exception $e) {
     echo Symbol::COLOR_RED . "{$e->getMessage()}\n" . Symbol::COLOR_RESET;

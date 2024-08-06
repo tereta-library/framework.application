@@ -140,14 +140,20 @@ class Manager
     private function setConfigConnection(): void
     {
         $dbConnections = $this->config->get('db');
+        if (!$dbConnections) {
+            return;
+        }
+
         foreach ($dbConnections as $name => $item) {
             $host = $this->config->get("db.{$name}.host");
             $user = $this->config->get("db.{$name}.user");
             $password = $this->config->get("db.{$name}.password");
+            $database = $this->config->get("db.{$name}.database");
             Singleton::createConnection(
                 $host ?? '127.0.0.1',
                 $user ?? 'developer',
                 $password ?? 'developer',
+                $database ?? 'developer',
                 $name
             );
         }
