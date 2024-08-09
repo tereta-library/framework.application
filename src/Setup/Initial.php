@@ -8,6 +8,7 @@ use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
 use Framework\Application\Manager as ApplicationManager;
+use Framework\Database\Singleton as DatabaseSingleton;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -38,6 +39,10 @@ class Initial
     {
         echo Symbol::COLOR_GREEN . "Setup database.\n" . Symbol::COLOR_RESET;
 
+        $connection = DatabaseSingleton::getConnection('default');
+
+        $this->loadPerformedSetup($connection);
+
         $applicationManager = ApplicationManager::instance();
         foreach($applicationManager->getClassByExpression('/^Setup\/.*\.php$/Usi') as $item) {
             $reflectionClass = new ReflectionClass($item);
@@ -52,6 +57,11 @@ class Initial
                 $this->runSetup($reflectionClass, $reflectionMethod);
             }
         }
+    }
+
+    private function loadPerformedSetup($connection): void
+    {
+
     }
 
     /**
