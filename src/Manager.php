@@ -60,6 +60,9 @@ class Manager
      */
     private InterfaceManager $adapter;
 
+    /**
+     * @var Config|null $config
+     */
     private ?Config $config = null;
 
     /**
