@@ -11,6 +11,7 @@ use ReflectionClass;
 use ReflectionException;
 use Framework\Cli\Symbol;
 use Framework\Application\Manager;
+use Framework\Application\Setup\Initial as SetupInitial;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -72,10 +73,9 @@ class Setup implements Controller
             );
         }
 
-        echo Symbol::COLOR_GREEN . "Setup modules.\n" . Symbol::COLOR_RESET;
-        echo Symbol::COLOR_GREEN . "Initialising modules.\n" . Symbol::COLOR_RESET;
-
         $this->setupModules();
+
+        (new SetupInitial)->setup();
     }
 
     /**
@@ -87,6 +87,8 @@ class Setup implements Controller
         if ($this->modifyComposer()) {
             return;
         }
+
+        echo Symbol::COLOR_GREEN . "Initialising modules.\n" . Symbol::COLOR_RESET;
 
         $modules = require($this->rootDirectory . '/vendor/composer/autoload_psr4.php');
         $modulesDir = $this->rootDirectory . '/app/module';
@@ -167,6 +169,8 @@ class Setup implements Controller
      */
     private function modifyComposer(): bool
     {
+        echo Symbol::COLOR_GREEN . "Setup modules.\n" . Symbol::COLOR_RESET;
+
         $composerFile = "{$this->rootDirectory}/composer.json";
         $data = json_decode(file_get_contents($composerFile), true);
 

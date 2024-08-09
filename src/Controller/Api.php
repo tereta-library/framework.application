@@ -32,7 +32,7 @@ use Framework\Api\Interface\Api as ApiInterface;
 class Api implements Controller
 {
     /**
-     * @router expression ANY /^\/api\/(\w+)\/(.*)(\?.*)?$/Usi
+     * @router expression ANY /^\/api\/(\w+)\/(.*)$/Usi
      * @param string $format
      * @param string $identifier
      * @return string

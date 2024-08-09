@@ -26,13 +26,21 @@ use Exception;
  */
 class Error
 {
-    public function notFound(): string
+    public function notFound(): ?string
     {
-        header('HTTP/1.0 404 Not Found');
-
         $view = Manager::instance()->getView();
 
         $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
+        $parsedUrl = parse_url($_SERVER['REQUEST_URI']);
+
+        if (isset($_GET['XDEBUG_SESSION_START'])) {
+            $getParams = $_GET;
+            unset($getParams['XDEBUG_SESSION_START']);
+            $queryString = http_build_query($getParams);
+            header('HTTP/1.0 301 XDebug parameter');
+            header("Location: {$scheme}://{$_SERVER['HTTP_HOST']}{$parsedUrl['path']}" . ($queryString ? "?{$queryString}" : ''));
+            return null;
+        }
 
         try {
             $view->initialize('error')
@@ -41,8 +49,11 @@ class Error
                 ->assign('code', 404)
                 ->assign('method', $_SERVER['REQUEST_METHOD'])
                 ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}");
+
+            header('HTTP/1.0 404 Not Found');
             return $view->render();
         } catch (Exception $e) {
+            header('HTTP/1.1 500');
             return $e->getMessage();
         }
     }
