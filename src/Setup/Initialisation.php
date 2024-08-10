@@ -16,6 +16,7 @@ use Framework\Database\Factory;
 use Framework\Application\Model\Resource\Setup\Collection as ResourceSetupCollection;
 use Framework\Application\Model\Setup as SetupModel;
 use Framework\Application\Model\Resource\Setup as ResourceSetupModel;
+use Framework\Database\Value\Now as ValueNow;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -74,6 +75,8 @@ class Initialisation
                 $this->runSetup($reflectionClass, $reflectionMethod, $connection);
             }
         }
+
+        echo Symbol::COLOR_GREEN . "Setup database completed.\n" . Symbol::COLOR_RESET;
     }
 
     /**
@@ -87,6 +90,7 @@ class Initialisation
             $tableQuery = Factory::createTable('setup');
             $tableQuery->addInteger('id')->setAutoIncrement()->setNotNull()->setPrimaryKey();
             $tableQuery->addString('identifier')->setNotNull()->setUnique();
+            $tableQuery->addDateTime('createdAt');
 
             $connection->query($tableQuery->build());
         }
@@ -114,7 +118,7 @@ class Initialisation
         ]));
 
         (new ResourceSetupModel)->save(
-            new SetupModel(['identifier' => $actionIdentifier])
+            new SetupModel(['identifier' => $actionIdentifier, 'createdAt' => new ValueNow()])
         );
     }
 }
