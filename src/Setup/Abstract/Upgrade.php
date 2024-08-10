@@ -9,7 +9,7 @@ use PDO;
  */
 abstract class Upgrade
 {
-    public function __construct(private PDO $connection)
+    public function __construct(protected PDO $connection)
     {
     }
 }
