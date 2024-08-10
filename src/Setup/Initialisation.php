@@ -3,12 +3,19 @@
 namespace Framework\Application\Setup;
 
 use Framework\Cli\Symbol;
-use Framework\Application\Setup\Interface\Upgrade as UpgradeInterface;
+use Framework\Application\Setup\Abstract\Upgrade as UpgradeAbstract;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
 use Framework\Application\Manager as ApplicationManager;
 use Framework\Database\Singleton as DatabaseSingleton;
+use PDO;
+use Framework\Database\Table;
+use Framework\Database\Facade;
+use Framework\Database\Factory;
+use Framework\Application\Model\Resource\Setup\Collection as ResourceSetupCollection;
+use Framework\Application\Model\Setup as SetupModel;
+use Framework\Application\Model\Resource\Setup as ResourceSetupModel;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -29,8 +36,13 @@ use Framework\Database\Singleton as DatabaseSingleton;
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  * @copyright 2020-2024 Tereta Alexander
  */
-class Initial
+class Initialisation
 {
+    /**
+     * @var array
+     */
+    private array $registeredActions = [];
+
     /**
      * @return void
      * @throws ReflectionException
@@ -41,39 +53,68 @@ class Initial
 
         $connection = DatabaseSingleton::getConnection('default');
 
-        $this->loadPerformedSetup($connection);
+        $this->prepareSetup($connection);
 
         $applicationManager = ApplicationManager::instance();
+        $setupArray = [];
         foreach($applicationManager->getClassByExpression('/^Setup\/.*\.php$/Usi') as $item) {
             $reflectionClass = new ReflectionClass($item);
-            if (!$reflectionClass->implementsInterface(UpgradeInterface::class)) continue;
+            if (!$reflectionClass->isSubclassOf(UpgradeAbstract::class)) continue;
 
             $setupArray[] = $reflectionClass;
         }
 
+        $reservedMethod = ['__construct'];
+
         foreach ($setupArray as $reflectionClass) {
             foreach ($reflectionClass->getMethods() as $reflectionMethod) {
                 if (!$reflectionMethod->isPublic()) continue;
-                $this->runSetup($reflectionClass, $reflectionMethod);
+                if (in_array($reflectionMethod->name, $reservedMethod)) continue;
+
+                $this->runSetup($reflectionClass, $reflectionMethod, $connection);
             }
         }
     }
 
-    private function loadPerformedSetup($connection): void
+    /**
+     * @param PDO $connection
+     * @return void
+     */
+    private function prepareSetup(PDO $connection): void
     {
+        $tableArray = Facade::showTables($connection, 'setup');
+        if (!in_array('setup', $tableArray)) {
+            $tableQuery = Factory::createTable('setup');
+            $tableQuery->addInteger('id')->setAutoIncrement()->setNotNull()->setPrimaryKey();
+            $tableQuery->addString('identifier')->setNotNull()->setUnique();
 
+            $connection->query($tableQuery->build());
+        }
+
+        foreach ((new ResourceSetupCollection) as $item) {
+            $this->registeredActions[] = $item->get('identifier');
+        }
     }
 
     /**
      * @param ReflectionClass $reflectionClass
      * @param ReflectionMethod $reflectionMethod
+     * @param PDO $connection
      * @return void
      * @throws ReflectionException
      */
-    private function runSetup(ReflectionClass $reflectionClass, ReflectionMethod $reflectionMethod): void
+    private function runSetup(ReflectionClass $reflectionClass, ReflectionMethod $reflectionMethod, PDO $connection): void
     {
         $actionIdentifier = "{$reflectionClass->name}->{$reflectionMethod->name}";
+        if (in_array($actionIdentifier, $this->registeredActions)) return;
+
         echo Symbol::COLOR_GREEN . "Setup {$actionIdentifier}.\n" . Symbol::COLOR_RESET;
-        $reflectionMethod->invoke($reflectionClass->newInstance());
+        $reflectionMethod->invoke($reflectionClass->newInstanceArgs([
+            'connection' => $connection
+        ]));
+
+        (new ResourceSetupModel)->save(
+            new SetupModel(['identifier' => $actionIdentifier])
+        );
     }
 }

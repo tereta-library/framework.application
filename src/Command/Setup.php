@@ -11,7 +11,7 @@ use ReflectionClass;
 use ReflectionException;
 use Framework\Cli\Symbol;
 use Framework\Application\Manager;
-use Framework\Application\Setup\Initial as SetupInitial;
+use Framework\Application\Setup\Initialisation as SetupInitialisation;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -75,7 +75,7 @@ class Setup implements Controller
 
         $this->setupModules();
 
-        (new SetupInitial)->setup();
+        (new SetupInitialisation)->setup();
     }
 
     /**
