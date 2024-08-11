@@ -13,13 +13,13 @@
         }
     ],
     "require": {
-        "tereta/framework.process": "^0.0.17",
-        "tereta/framework.http": "^0.0.17",
-        "tereta/framework.view": "^0.0.17",
-        "tereta/framework.cli": "^0.0.17",
-        "tereta/framework.docker": "^0.0.17",
-        "tereta/framework.helper": "^0.0.17",
-        "tereta/framework.database": "^0.0.17",
-        "tereta/framework.dom": "^0.0.17",
+        "tereta/framework.process": "^0.0.18",
+        "tereta/framework.http": "^0.0.18",
+        "tereta/framework.view": "^0.0.18",
+        "tereta/framework.cli": "^0.0.18",
+        "tereta/framework.docker": "^0.0.18",
+        "tereta/framework.helper": "^0.0.18",
+        "tereta/framework.database": "^0.0.18",
+        "tereta/framework.dom": "^0.0.18",
     }
 }
