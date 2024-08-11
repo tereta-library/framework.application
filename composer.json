@@ -20,6 +20,6 @@
         "tereta/framework.docker": "^0.0.18",
         "tereta/framework.helper": "^0.0.18",
         "tereta/framework.database": "^0.0.18",
-        "tereta/framework.dom": "^0.0.18",
+        "tereta/framework.dom": "^0.0.18"
     }
 }
