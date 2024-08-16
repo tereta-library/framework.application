@@ -40,11 +40,12 @@ class Api implements Controller
      */
     public function execute(string $format, string $identifier): string
     {
+        $routeIdentifier = "{$_SERVER['REQUEST_METHOD']} {$identifier}";
         $apiSourceList = [];
         $apiList = [];
         $payload = file_get_contents('php://input');
         $apiSpecification = (new ApiFactory())->create($format);
-        $input = $apiSpecification->decode($payload);
+        $input = $payload ? $apiSpecification->decode($payload) : $_POST;
 
         $classList = Manager::instance()->getClassByExpression('/^Api\/.*\.php$/Usi');
         foreach ($classList as $item) {
@@ -68,12 +69,12 @@ class Api implements Controller
         }
 
         try {
-            if (!isset($apiList[$identifier])) {
-                throw new Exception("The \"{$identifier}\" API endpoint not found", 404);
+            if (!isset($apiList[$routeIdentifier])) {
+                throw new Exception("The \"{$routeIdentifier}\" API endpoint not found", 404);
             }
 
-            $apiClassReflection = $apiList[$identifier]['class'];
-            $apiMethodReflection = $apiList[$identifier]['method'];
+            $apiClassReflection = $apiList[$routeIdentifier]['class'];
+            $apiMethodReflection = $apiList[$routeIdentifier]['method'];
 
             $apiMethodParametersReflection = $apiMethodReflection->getParameters();
             $inputType = null;
@@ -81,8 +82,9 @@ class Api implements Controller
                 $inputType = $apiMethodParametersReflection[0]->getType()->getName();
             }
 
-            if ($inputType && $inputType != gettype($input)) {
-                throw new Exception("The input type must be \"{$inputType}\"", 500);
+            $inputTypeValue = gettype($input);
+            if ($inputType && $inputType != $inputTypeValue) {
+                throw new Exception("The input type must be \"{$inputType}\", the \"{$inputTypeValue}\" passed for the \"{$apiMethodParametersReflection[0]->name}\" parameter of the {$apiClassReflection->name}::{$apiMethodReflection->name} method.", 500);
             }
 
             $output = $apiMethodReflection->invoke($apiClassReflection->newInstance(), $input);
@@ -93,6 +95,7 @@ class Api implements Controller
             ]);
         }
 
+        header('Cache-Control: no-cache, no-store, must-revalidate');
         return $apiSpecification->encode($output);
     }
 }
