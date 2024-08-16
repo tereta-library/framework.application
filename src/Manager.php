@@ -112,7 +112,7 @@ class Manager
     /**
      * @return $this
      */
-    public static function instance(): static
+    public static function getInstance(): static
     {
         return static::$instance;
     }
@@ -132,6 +132,21 @@ class Manager
         $this->config = (new Config('php', $config))->load("{$configDirectory}/config.php");
 
         $this->setConfigConnection();
+
+        $this->config->set(
+            'varDirectory',
+            $this->config->get('varDirectory') ?? static::$rootDirectory . '/var'
+        );
+
+        $this->config->set(
+            'publicMedia',
+            $this->config->get('publicMedia') ?? static::$rootDirectory . '/pub/media'
+        );
+
+        $this->config->set(
+            'publicMediaUri',
+            $this->config->get('publicMedia') ?? '/media'
+        );
 
         $this->adapter->setConfig($this->config);
         return $this;

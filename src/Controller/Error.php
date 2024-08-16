@@ -28,7 +28,7 @@ class Error
 {
     public function notFound(): ?string
     {
-        $view = Manager::instance()->getView();
+        $view = Manager::getInstance()->getView();
 
         $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
         $parsedUrl = parse_url($_SERVER['REQUEST_URI']);
@@ -62,7 +62,7 @@ class Error
     {
         header('HTTP/1.1 500');
 
-        $view = Manager::instance()->getView();
+        $view = Manager::getInstance()->getView();
 
         $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
 

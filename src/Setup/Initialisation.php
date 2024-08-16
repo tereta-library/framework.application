@@ -56,7 +56,7 @@ class Initialisation
 
         $this->prepareSetup($connection);
 
-        $applicationManager = ApplicationManager::instance();
+        $applicationManager = ApplicationManager::getInstance();
         $setupArray = [];
         foreach($applicationManager->getClassByExpression('/^Setup\/.*\.php$/Usi') as $item) {
             $reflectionClass = new ReflectionClass($item);

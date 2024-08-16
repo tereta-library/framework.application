@@ -82,11 +82,22 @@ class Http implements Manager
             'themeDirectory',
             $config->get('themeDirectory') ?? "{$this->rootDirectory}/app/view"
         );
-        $config->set('varDirectory', "{$this->rootDirectory}/var");
-        $config->set('generatedDirectory', "{$this->rootDirectory}/generated");
-        $config->set('theme', 'base');
-        $config->set('themeDirectory', "{$config->get('themeDirectory')}/{$config->get('theme')}/layout");
-        $config->set('generatedThemeDirectory', "{$config->get('generatedDirectory')}/{$config->get('theme')}/layout");
+        $config->set(
+            'generatedDirectory',
+            $config->get('generatedDirectory') ?? "{$this->rootDirectory}/generated"
+        );
+        $config->set(
+            'theme',
+            $config->get('theme') ?? 'base'
+        );
+        $config->set(
+            'themeDirectory',
+            $config->get('themeDirectory') ?? "{$config->get('themeDirectory')}/{$config->get('theme')}/layout"
+        );
+        $config->set(
+            'generatedThemeDirectory',
+            $config->get('generatedThemeDirectory') ?? "{$config->get('generatedDirectory')}/{$config->get('theme')}/layout"
+        );
 
         $this->view = new Html(
             $config->get('themeDirectory'),

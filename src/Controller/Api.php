@@ -47,7 +47,7 @@ class Api implements Controller
         $apiSpecification = (new ApiFactory())->create($format);
         $input = $payload ? $apiSpecification->decode($payload) : $_POST;
 
-        $classList = Manager::instance()->getClassByExpression('/^Api\/.*\.php$/Usi');
+        $classList = Manager::getInstance()->getClassByExpression('/^Api\/.*\.php$/Usi');
         foreach ($classList as $item) {
             $reflectionClass = new ReflectionClass($item);
             if (!$reflectionClass->implementsInterface(ApiInterface::class)) continue;
