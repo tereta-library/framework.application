@@ -29,7 +29,7 @@ use Framework\Database\Value\Now as ValueNow;
  * ·······································································
  * ·······································································
  *
- * @class Framework\Application\Setup\Initial
+ * @class Framework\Application\Setup\Installation
  * @package Framework\Application\Setup
  * @link https://tereta.dev
  * @since 2020-2024
@@ -37,7 +37,7 @@ use Framework\Database\Value\Now as ValueNow;
  * @author Tereta Alexander <tereta.alexander@gmail.com>
  * @copyright 2020-2024 Tereta Alexander
  */
-class Initialisation
+class Installation
 {
     /**
      * @var array
@@ -88,9 +88,11 @@ class Initialisation
         $tableArray = Facade::showTables($connection, 'setup');
         if (!in_array('setup', $tableArray)) {
             $tableQuery = Factory::createTable('setup');
-            $tableQuery->addInteger('id')->setAutoIncrement()->setNotNull()->setPrimaryKey();
-            $tableQuery->addString('identifier')->setNotNull()->setUnique();
-            $tableQuery->addDateTime('createdAt');
+            $tableQuery->addInteger('id')->setAutoIncrement()->setNotNull()->setPrimaryKey()->setComment('Setup ID');
+            $tableQuery->addString('identifier')->setNotNull()->setUnique()->setComment(
+                'Class and action identifier in the Framework\User\Setup\Structure->create format'
+            );
+            $tableQuery->addDateTime('createdAt')->setComment('Setup created at');
 
             $connection->query($tableQuery->build());
         }
