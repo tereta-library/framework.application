@@ -9,6 +9,8 @@ use Exception;
 use Framework\Application\Manager;
 use ReflectionClass;
 use Framework\Api\Interface\Api as ApiInterface;
+use Framework\Application\Api\Parameter\Payload as PayloadParameter;
+use Framework\Application\Api\Parameter\Post as PostParameter;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -40,12 +42,11 @@ class Api implements Controller
      */
     public function execute(string $format, string $identifier): string
     {
-        $routeIdentifier = "{$_SERVER['REQUEST_METHOD']} {$identifier}";
         $apiSourceList = [];
-        $apiList = [];
-        $payload = file_get_contents('php://input');
+        $payloadObject = (new PayloadParameter())->decode(file_get_contents('php://input'));
+        $postObject = (new PostParameter($_POST));
         $apiSpecification = (new ApiFactory())->create($format);
-        $input = $payload ? $apiSpecification->decode($payload) : $_POST;
+        $requestMethod = $_SERVER['REQUEST_METHOD'];
 
         $classList = Manager::getInstance()->getClassByExpression('/^Api\/.*\.php$/Usi');
         foreach ($classList as $item) {
@@ -54,6 +55,7 @@ class Api implements Controller
             $apiSourceList[] = $reflectionClass;
         }
 
+        $apiFound = false;
         foreach ($apiSourceList as $item) {
             foreach ($item->getMethods() as $reflectionMethod) {
                 if (!$reflectionMethod->isPublic()) continue;
@@ -61,33 +63,46 @@ class Api implements Controller
                 $variables = PhpDoc::getMethodVariables($item->name, $reflectionMethod->name);
                 if (!isset($variables['api']) || !$variables['api']) continue;
 
-                $apiList[$variables['api']] = [
-                    'class' => $item,
-                    'method' => $reflectionMethod
-                ];
+                $apiResultCandiate = $this->fetchApi($requestMethod, $identifier, $variables['api'], $item, $reflectionMethod);
+                if ($apiResultCandiate) {
+                    $apiFound = $apiResultCandiate;
+                }
             }
         }
 
         try {
-            if (!isset($apiList[$routeIdentifier])) {
-                throw new Exception("The \"{$routeIdentifier}\" API endpoint not found", 404);
+            if (!$apiFound) {
+                throw new Exception("The \"{$identifier}\" API endpoint not found", 404);
             }
 
-            $apiClassReflection = $apiList[$routeIdentifier]['class'];
-            $apiMethodReflection = $apiList[$routeIdentifier]['method'];
+            $apiClassReflection = $apiFound['class'];
+            $apiMethodReflection = $apiFound['method'];
+            $apiParams = $apiFound['parameters'];
 
             $apiMethodParametersReflection = $apiMethodReflection->getParameters();
-            $inputType = null;
-            if (count($apiMethodParametersReflection) >= 1) {
-                $inputType = $apiMethodParametersReflection[0]->getType()->getName();
+            array_pop($apiMethodParametersReflection);
+            foreach ($apiMethodParametersReflection as $parameterKey => $parameterItem) {
+                if (!isset($apiParams[$parameterKey])) {
+                    throw new Exception(
+                        "The \"{$parameterItem->name}\" parameter is required for the \"{$apiMethodReflection->name}\" method of the {$apiClassReflection->name} class.",
+                        500
+                    );
+                }
+
+                $inputType = $parameterItem->getType()->getName();
+                $inputTypeValue = gettype($apiParams[$parameterKey]);
+                if ($inputType && $inputType != $inputTypeValue) {
+                    throw new Exception(
+                        "The input type must be \"{$inputType}\", " .
+                        "the \"{$inputTypeValue}\" passed for the \"{$apiMethodParametersReflection[0]->name}\" " .
+                        "parameter of the {$apiClassReflection->name}::{$apiMethodReflection->name} method.",
+                        500
+                    );
+                }
             }
 
-            $inputTypeValue = gettype($input);
-            if ($inputType && $inputType != $inputTypeValue) {
-                throw new Exception("The input type must be \"{$inputType}\", the \"{$inputTypeValue}\" passed for the \"{$apiMethodParametersReflection[0]->name}\" parameter of the {$apiClassReflection->name}::{$apiMethodReflection->name} method.", 500);
-            }
-
-            $output = $apiMethodReflection->invoke($apiClassReflection->newInstance(), $input);
+            $invokeArguments = $this->invokeArgumentsMap($apiMethodReflection, $apiParams, $payloadObject, $postObject);
+            $output = $apiMethodReflection->invokeArgs($apiClassReflection->newInstance(), $invokeArguments);
         } catch (Exception $e) {
             return $apiSpecification->encode([
                 'error' => $e->getMessage(),
@@ -97,5 +112,64 @@ class Api implements Controller
 
         header('Cache-Control: no-cache, no-store, must-revalidate');
         return $apiSpecification->encode($output);
+    }
+
+    /**
+     * @param $reflectionMethod
+     * @param array $apiParams
+     * @param PayloadParameter $payload
+     * @param PostParameter $postObject
+     * @return array
+     */
+    private function invokeArgumentsMap($reflectionMethod, array $apiParams, PayloadParameter $payload, PostParameter $postObject): array
+    {
+        $invokeArguments = [];
+        $key = 0;
+        foreach ($reflectionMethod->getParameters() as $parameter) {
+            $type = $parameter->getType()->getName();
+            switch($type) {
+                case(PayloadParameter::class):
+                    $invokeArguments[] = $payload;
+                    continue;
+                case(PostParameter::class):
+                    $invokeArguments[] = $postObject;
+                    continue;
+            }
+
+            $invokeArguments[] = $apiParams[$key];
+            $key++;
+        }
+
+        return $invokeArguments;
+    }
+
+    /**
+     * @param string $requestMethod
+     * @param string $requestIdentifier
+     * @param string $apiRule
+     * @param $reflectionClass
+     * @param $reflectionMethod
+     * @return array|null
+     */
+    private function fetchApi(string $requestMethod, string $requestIdentifier, string $apiRule, $reflectionClass, $reflectionMethod): ?array
+    {
+        $apiRuleExploded = explode(' ', $apiRule);
+        $apiRuleMethod = array_shift($apiRuleExploded);
+        if ($apiRuleMethod != 'ANY' && $apiRuleMethod != $requestMethod) {
+            return null;
+        }
+
+        $apiRuleUrl = trim(array_shift($apiRuleExploded));
+        if (!preg_match($apiRuleUrl, $requestIdentifier, $matches)) {
+            return null;
+        }
+
+        array_shift($matches);
+
+        return [
+            'class' => $reflectionClass,
+            'method' => $reflectionMethod,
+            'parameters' => $matches,
+        ];
     }
 }
