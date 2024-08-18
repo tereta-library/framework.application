@@ -4,6 +4,7 @@ namespace Framework\Application\Setup;
 
 use Framework\Cli\Symbol;
 use Framework\Application\Setup\Abstract\Upgrade as UpgradeAbstract;
+use Framework\Helper\PhpDoc;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionException;
@@ -67,16 +68,46 @@ class Installation
 
         $reservedMethod = ['__construct'];
 
+        $setupCollected = [];
         foreach ($setupArray as $reflectionClass) {
             foreach ($reflectionClass->getMethods() as $reflectionMethod) {
                 if (!$reflectionMethod->isPublic()) continue;
                 if (in_array($reflectionMethod->name, $reservedMethod)) continue;
 
-                $this->runSetup($reflectionClass, $reflectionMethod, $connection);
+                $creatingTime = $this->getDateTimeCreating($reflectionClass->name, $reflectionMethod->name);
+                $setupCollected[$creatingTime][] = [$reflectionClass, $reflectionMethod];
+            }
+        }
+
+        ksort($setupCollected);
+
+        foreach ($setupCollected as $item) {
+            foreach ($item as $item) {
+                $this->runSetup($item[0], $item[1], $connection);
             }
         }
 
         echo Symbol::COLOR_GREEN . "Setup database completed.\n" . Symbol::COLOR_RESET;
+    }
+
+    /**
+     * @param string $class
+     * @param string $method
+     * @return int
+     * @throws ReflectionException
+     */
+    private function getDateTimeCreating(string $class, string $method): int
+    {
+        $docVariables = PhpDoc::getMethodVariables($class, $method);
+        if (preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2}).*$/Usi', $docVariables['date'], $match)) {
+            return mktime((int) $match[4], (int) $match[5], (int) $match[6], (int) $match[2], (int) $match[3], (int) $match[1]);
+        }
+
+        if (preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}).*$/Usi', $docVariables['date'], $match)) {
+            return mktime(0, 0, 0, (int) $match[2], (int) $match[3], (int) $match[1]);
+        }
+
+        return 0;
     }
 
     /**
