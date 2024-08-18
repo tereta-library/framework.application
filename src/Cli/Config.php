@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Framework\Application\Command;
+namespace Framework\Application\Cli;
 
 use Framework\Application\Manager;
 use Framework\Cli\Interface\Controller;
@@ -18,8 +18,8 @@ use Framework\Helper\Config as ConfigHelper;
  * ·······································································
  * ·······································································
  *
- * @class Framework\Application\Command\Config
- * @package Framework\Application\Command
+ * @class Framework\Application\Cli\Config
+ * @package Framework\Application\Cli
  * @link https://tereta.dev
  * @since 2020-2024
  * @license   http://www.apache.org/licenses/LICENSE-2.0  Apache License 2.0

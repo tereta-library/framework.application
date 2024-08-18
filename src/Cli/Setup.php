@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Framework\Application\Command;
+namespace Framework\Application\Cli;
 
 use Framework\Cli\Interface\Controller;
 use Framework\Helper\File;

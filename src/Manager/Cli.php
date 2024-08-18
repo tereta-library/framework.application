@@ -70,10 +70,10 @@ class Cli implements Manager
         $commandClasses = [];
         foreach ($this->parent->getActiveModules() as $module => $path) {
             $rootDirectory = $this->parent::getRootDirectory();
-            $files = File::getFiles("{$rootDirectory}/{$path}/Command", '/.*\.php/Usi');
+            $files = File::getFiles("{$rootDirectory}/{$path}/Cli", '/.*\.php/Usi');
 
             foreach ($files as $file) {
-                $commandClasses[] = "{$module}\\Command\\" . substr(str_replace('/', '\\', $file), 0, -4);
+                $commandClasses[] = "{$module}\\Cli\\" . substr(str_replace('/', '\\', $file), 0, -4);
             }
         }
 
