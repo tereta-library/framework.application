@@ -2,6 +2,7 @@
 
 namespace Framework\Application\Controller;
 
+use Framework\Application\Manager\Http\Parameter\Get as GetParameter;
 use Framework\Helper\PhpDoc;
 use Framework\Http\Interface\Controller;
 use Framework\Api\Factory as ApiFactory;
@@ -9,8 +10,9 @@ use Exception;
 use Framework\Application\Manager;
 use ReflectionClass;
 use Framework\Api\Interface\Api as ApiInterface;
-use Framework\Application\Api\Parameter\Payload as PayloadParameter;
-use Framework\Application\Api\Parameter\Post as PostParameter;
+use Framework\Application\Manager\Http\Parameter\Payload as PayloadParameter;
+use Framework\Application\Manager\Http\Parameter\Post as PostParameter;
+use Framework\Application\Manager\Http\Parameter as HttpParameter;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -45,6 +47,7 @@ class Api implements Controller
         $apiSourceList = [];
         $payloadObject = (new PayloadParameter())->decode(file_get_contents('php://input'));
         $postObject = (new PostParameter($_POST));
+        $getObject = (new GetParameter($_GET));
         $apiSpecification = (new ApiFactory())->create($format);
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
@@ -81,27 +84,10 @@ class Api implements Controller
 
             $apiMethodParametersReflection = $apiMethodReflection->getParameters();
             array_pop($apiMethodParametersReflection);
-            foreach ($apiMethodParametersReflection as $parameterKey => $parameterItem) {
-                if (!isset($apiParams[$parameterKey])) {
-                    throw new Exception(
-                        "The \"{$parameterItem->name}\" parameter is required for the \"{$apiMethodReflection->name}\" method of the {$apiClassReflection->name} class.",
-                        500
-                    );
-                }
 
-                $inputType = $parameterItem->getType()->getName();
-                $inputTypeValue = gettype($apiParams[$parameterKey]);
-                if ($inputType && $inputType != $inputTypeValue) {
-                    throw new Exception(
-                        "The input type must be \"{$inputType}\", " .
-                        "the \"{$inputTypeValue}\" passed for the \"{$apiMethodParametersReflection[0]->name}\" " .
-                        "parameter of the {$apiClassReflection->name}::{$apiMethodReflection->name} method.",
-                        500
-                    );
-                }
-            }
-
-            $invokeArguments = $this->invokeArgumentsMap($apiMethodReflection, $apiParams, $payloadObject, $postObject);
+            $invokeArguments = HttpParameter::methodDetection(
+                $apiMethodReflection, array_merge($apiParams, [$payloadObject, $postObject, $getObject])
+            );
             $output = $apiMethodReflection->invokeArgs($apiClassReflection->newInstance(), $invokeArguments);
         } catch (Exception $e) {
             return $apiSpecification->encode([
@@ -112,35 +98,6 @@ class Api implements Controller
 
         header('Cache-Control: no-cache, no-store, must-revalidate');
         return $apiSpecification->encode($output);
-    }
-
-    /**
-     * @param $reflectionMethod
-     * @param array $apiParams
-     * @param PayloadParameter $payload
-     * @param PostParameter $postObject
-     * @return array
-     */
-    private function invokeArgumentsMap($reflectionMethod, array $apiParams, PayloadParameter $payload, PostParameter $postObject): array
-    {
-        $invokeArguments = [];
-        $key = 0;
-        foreach ($reflectionMethod->getParameters() as $parameter) {
-            $type = $parameter->getType()->getName();
-            switch($type) {
-                case(PayloadParameter::class):
-                    $invokeArguments[] = $payload;
-                    continue;
-                case(PostParameter::class):
-                    $invokeArguments[] = $postObject;
-                    continue;
-            }
-
-            $invokeArguments[] = $apiParams[$key];
-            $key++;
-        }
-
-        return $invokeArguments;
     }
 
     /**

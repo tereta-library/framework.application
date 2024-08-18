@@ -4,6 +4,10 @@ namespace Framework\Application\Manager;
 
 use Framework\Application\Interface\Manager;
 use Framework\Application\Manager as ParentManager;
+use Framework\Application\Manager\Http\Parameter as HttpParameter;
+use Framework\Application\Manager\Http\Parameter\Payload as PayloadParameter;
+use Framework\Application\Manager\Http\Parameter\Post as PostParameter;
+use Framework\Application\Manager\Http\Parameter\Get as GetParameter;
 use Framework\Controller\Action as ControllerAction;
 use Framework\Helper\Config;
 use Framework\Helper\File;
@@ -332,6 +336,10 @@ class Http implements Manager
      */
     private function runAction(?Action $actionClass): mixed
     {
+        $payloadObject = (new PayloadParameter())->decode(file_get_contents('php://input'));
+        $postObject = (new PostParameter($_POST));
+        $getObject = (new GetParameter($_GET));
+
         $controllerAction = explode('->', $actionClass->getAction());
         $controller = array_shift($controllerAction);
         $action = array_shift($controllerAction);
@@ -346,6 +354,9 @@ class Http implements Manager
         $reflectionMethod = new ReflectionMethod($controller, $action);
         $reflectionMethod->isPublic() || throw new Exception("The action method \"$action\" should be public");
 
-        return $reflectionMethod->invokeArgs($instance, $actionClass->getParams());
+        $invokeArguments = HttpParameter::methodDetection(
+            $reflectionMethod, array_merge($actionClass->getParams(), [$payloadObject, $postObject, $getObject])
+        );
+        return $reflectionMethod->invokeArgs($instance, $invokeArguments);
     }
 }
