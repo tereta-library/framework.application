@@ -134,13 +134,13 @@ class Manager
         $this->setConfigConnection();
 
         $this->config->set(
-            'generatedDirectory',
-            $this->config->get('generatedDirectory') ?? static::$rootDirectory . '/generated'
+            'varDirectory',
+            $this->config->get('varDirectory') ?? static::$rootDirectory . '/var'
         );
 
         $this->config->set(
-            'varDirectory',
-            $this->config->get('varDirectory') ?? static::$rootDirectory . '/var'
+            'generatedDirectory',
+            $this->config->get('generatedDirectory') ?? $this->config->get('varDirectory') . '/generated'
         );
 
         $this->config->set(
