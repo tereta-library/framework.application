@@ -88,6 +88,7 @@ class Api implements Controller
             $invokeArguments = HttpParameter::methodDetection(
                 $apiMethodReflection, array_merge($apiParams, [$payloadObject, $postObject, $getObject])
             );
+
             $output = $apiMethodReflection->invokeArgs($apiClassReflection->newInstance(), $invokeArguments);
         } catch (Exception $e) {
             return $apiSpecification->encode([
