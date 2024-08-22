@@ -354,6 +354,10 @@ class Http implements Manager
         $reflectionMethod = new ReflectionMethod($controller, $action);
         $reflectionMethod->isPublic() || throw new Exception("The action method \"$action\" should be public");
 
+        if ($reflectionClass->hasMethod('construct') && $reflectionMethod->getName() != 'construct') {
+            $reflectionClass->getMethod('construct')->invoke($reflectionClass->newInstance());
+        }
+
         $invokeArguments = HttpParameter::methodDetection(
             $reflectionMethod, array_merge($actionClass->getParams(), [$payloadObject, $postObject, $getObject])
         );

@@ -82,6 +82,11 @@ class Api implements Controller
             $apiMethodReflection = $apiFound['method'];
             $apiParams = $apiFound['parameters'];
 
+            $classInstance = $apiClassReflection->newInstance();
+            if ($apiClassReflection->hasMethod('construct') && $apiMethodReflection->getName() != 'construct') {
+                $apiClassReflection->getMethod('construct')->invoke($classInstance);
+            }
+
             $apiMethodParametersReflection = $apiMethodReflection->getParameters();
             array_pop($apiMethodParametersReflection);
 
@@ -89,7 +94,7 @@ class Api implements Controller
                 $apiMethodReflection, array_merge($apiParams, [$payloadObject, $postObject, $getObject])
             );
 
-            $output = $apiMethodReflection->invokeArgs($apiClassReflection->newInstance(), $invokeArguments);
+            $output = $apiMethodReflection->invokeArgs($classInstance, $invokeArguments);
         } catch (Exception $e) {
             return $apiSpecification->encode([
                 'error' => $e->getMessage(),
