@@ -76,7 +76,7 @@ class Error
                 ->assign('message', $e->getMessage())
                 ->assign('backTrace', $e->getTraceAsString());
             return $view->render();
-        } catch (Exception $e) {
+        } catch (Exception $eError) {
             return "<html><body><h1>500 Fatal Error</h1><table>" .
                 "<tr><th>Message </th><td>{$e->getMessage()}</td></tr>" .
                 "<tr><th>File </th><td>{$e->getFile()}</td></tr>" .
