@@ -43,9 +43,12 @@ class Error
         }
 
         try {
-            $view->initialize('error')
-                ->getBlockById('content')
-                ->assign('title', '404 Not Found')
+            $block = $view->initialize('error')
+                ->getBlockById('main');
+
+            if (!$block) throw new Exception('The #main block was not found');
+
+            $block->assign('title', '404 Not Found')
                 ->assign('code', 404)
                 ->assign('method', $_SERVER['REQUEST_METHOD'])
                 ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}");
@@ -67,9 +70,12 @@ class Error
         $scheme = $_SERVER['REQUEST_SCHEME'] ?? 'http';
 
         try {
-            $view->initialize('error')
-                ->getBlockById('content')
-                ->assign('title', '500 Fatal Error')
+            $block = $view->initialize('error')
+                ->getBlockById('main');
+
+            if (!$block) throw new Exception('The #main block was not found');
+
+            $block->assign('title', '500 Fatal Error')
                 ->assign('code', 500)
                 ->assign('method', $_SERVER['REQUEST_METHOD'])
                 ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}")
