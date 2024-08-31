@@ -99,6 +99,11 @@ class Make implements Controller
             "    }\n" .
             "}\n";
 
+        $modelDirectory = dirname($modelFile);
+        if (!is_dir($modelDirectory)) {
+            mkdir($modelDirectory, 0777, true);
+        }
+
         file_put_contents($modelFile, $content);
 
         echo Symbol::COLOR_GREEN . "The \"{$fullSetupName}\" setup class successfully created at the {$modelFile} file\n" . Symbol::COLOR_RESET;
