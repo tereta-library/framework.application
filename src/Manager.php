@@ -150,7 +150,7 @@ class Manager
 
         $this->config->set(
             'publicMediaUri',
-            $this->config->get('publicMedia') ?? '/media'
+            $this->config->get('publicMediaUri') ?? '/media'
         );
 
         $this->adapter->setConfig($this->config);
