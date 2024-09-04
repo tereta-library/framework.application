@@ -98,7 +98,7 @@ class Api implements Controller
         } catch (Exception $e) {
             return $apiSpecification->encode([
                 'error' => $e->getMessage(),
-                'code' => $e->getCode()
+                'errorCode' => $e->getCode()
             ]);
         }
 
