@@ -24,7 +24,7 @@ use Framework\Application\Setup\Installation as SetupInstallation;
  * ·······································································
  * ·······································································
  *
- * @class Framework\Application\Command\Setup
+ * @class Framework\Application\Cli\Setup
  * @package Framework\Application\Command
  * @link https://tereta.dev
  * @since 2020-2024
@@ -49,6 +49,7 @@ class Setup implements Controller
      */
     public function __construct()
     {
+        $this->manager = Manager::getInstance();
         $this->rootDirectory = Manager::getRootDirectory();
     }
 
@@ -146,6 +147,8 @@ class Setup implements Controller
 
         $this->config = (new Config('php', $activeModules))
             ->save($this->rootDirectory . '/app/etc/modules.php');
+
+        $this->manager->getActiveModules(true);
 
         echo Symbol::COLOR_GREEN. "Modules successfully initialized.\n" . Symbol::COLOR_RESET;
     }

@@ -207,11 +207,12 @@ class Manager
     }
 
     /**
+     * @param bool $update
      * @return array
      */
-    public function getActiveModules(): array
+    public function getActiveModules(bool $update = false): array
     {
-        if ($this->activeModules !== null) {
+        if (!$update && $this->activeModules !== null) {
             return $this->activeModules;
         }
 
