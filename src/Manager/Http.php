@@ -83,10 +83,6 @@ class Http implements Manager
     {
         $this->config = $config;
         $config->set(
-            'viewDirectory',
-            $config->get('viewDirectory') ?? "{$this->rootDirectory}/app/view"
-        );
-        $config->set(
             'theme',
             $config->get('theme') ?? 'base'
         );

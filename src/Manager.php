@@ -153,6 +153,11 @@ class Manager
             $this->config->get('publicMediaUri') ?? '/media'
         );
 
+        $this->config->set(
+            'viewDirectory',
+            $this->config->get('viewDirectory') ?? static::$rootDirectory . "/app/view"
+        );
+
         $this->adapter->setConfig($this->config);
         return $this;
     }
