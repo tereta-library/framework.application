@@ -82,22 +82,17 @@ class Http implements Manager
     public function setConfig(Config $config): void
     {
         $this->config = $config;
-        $config->set(
+        $this->config->set(
             'theme',
-            $config->get('theme') ?? 'base'
+            $this->config->get('theme') ?? 'base'
         );
-        $config->set(
+        $this->config->set(
             'themeDirectory',
-            $config->get('themeDirectory') ?? "{$config->get('viewDirectory')}/{$config->get('theme')}/layout"
+            $this->config->get('themeDirectory') ?? "{$this->config->get('viewDirectory')}/{$this->config->get('theme')}/layout"
         );
-        $config->set(
+        $this->config->set(
             'generatedThemeDirectory',
-            $config->get('generatedThemeDirectory') ?? "{$config->get('generatedDirectory')}/{$config->get('theme')}/layout"
-        );
-
-        $this->view = new Html(
-            $config->get('themeDirectory'),
-            $config->get('generatedThemeDirectory')
+            $this->config->get('generatedThemeDirectory') ?? "{$this->config->get('generatedDirectory')}/{$this->config->get('theme')}/layout"
         );
     }
 
@@ -106,7 +101,14 @@ class Http implements Manager
      */
     public function getView(): ?Html
     {
-        return $this->view;
+        if ($this->view) {
+            return $this->view;
+        }
+
+        return $this->view = new Html(
+            $this->config->get('themeDirectory'),
+            $this->config->get('generatedThemeDirectory')
+        );
     }
 
     /**
