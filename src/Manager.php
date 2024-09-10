@@ -8,6 +8,8 @@ use Framework\Helper\Config;
 use Framework\Helper\File;
 use Framework\View\Html as ViewHtml;
 use Framework\Database\Singleton;
+use Framework\Helper\ArrayManager;
+use Framework\Pattern\Observer;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -64,6 +66,11 @@ class Manager
      * @var Config|null $config
      */
     private ?Config $config = null;
+
+    /**
+     * @var Observer|null $events
+     */
+    private ?Observer $events = null;
 
     /**
      * @param string $rootDirectory
@@ -131,6 +138,8 @@ class Manager
         $configDirectory = $config['configDirectory'] ?? realpath(static::$rootDirectory . '/app/etc');
         $this->config = (new Config('php', $config))->load("{$configDirectory}/config.php");
 
+        $this->setConfigModules();
+
         $this->setConfigConnection();
 
         $this->config->set(
@@ -159,7 +168,44 @@ class Manager
         );
 
         $this->adapter->setConfig($this->config);
+
+        $this->getEvents()->dispatch('application.manager.viewConfig', ['manager' => $this]);
+
         return $this;
+    }
+
+    private function setConfigModules()
+    {
+        $configFiles = [];
+
+        foreach ($this->getActiveModules() as $module => $path) {
+            $rootDirectory = static::getRootDirectory();
+            $files = File::getFiles("{$rootDirectory}/{$path}/", '/^etc\/config.php$/');
+
+
+            $files = array_map(function($file) use ($rootDirectory, $path) {
+                return "{$rootDirectory}/{$path}/$file";
+            }, $files);
+
+            $configFiles = array_merge($configFiles, $files);
+        }
+
+        $config = [];
+        foreach ($configFiles as $file) {
+            $configItem = require($file);
+
+            $config = ArrayManager::merge($config, $configItem);
+        }
+
+        $events = $this->config->get('events');
+        $this->config->set('events', ArrayManager::merge($events ?? [], $config['events'] ?? []));
+        if (isset($config['events'])) {
+            unset($config['events']);
+        }
+
+        $this->config->set('module', $config);
+
+        $this->getEvents()->dispatch('application.manager.config', ['manager' => $this]);
     }
 
     /**
@@ -286,5 +332,18 @@ class Manager
         }
 
         $this->adapter->run();
+    }
+
+    /**
+     * @param bool $reset
+     * @return Observer
+     */
+    private function getEvents(bool $reset = false): Observer
+    {
+        if (!$reset && $this->events) {
+            return $this->events;
+        }
+
+        return $this->events = new Observer($this->config->get('events'));
     }
 }
