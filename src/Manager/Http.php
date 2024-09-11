@@ -88,11 +88,11 @@ class Http implements Manager
         );
         $this->config->set(
             'themeDirectory',
-            $this->config->get('themeDirectory') ?? "{$this->config->get('viewDirectory')}/{$this->config->get('theme')}/layout"
+            $this->config->get('themeDirectory') ?? "{$this->config->get('viewDirectory')}/{$this->config->get('theme')}"
         );
         $this->config->set(
             'generatedThemeDirectory',
-            $this->config->get('generatedThemeDirectory') ?? "{$this->config->get('generatedDirectory')}/{$this->config->get('theme')}/layout"
+            $this->config->get('generatedThemeDirectory') ?? "{$this->config->get('generatedDirectory')}/{$this->config->get('theme')}"
         );
     }
 
@@ -105,10 +105,36 @@ class Http implements Manager
             return $this->view;
         }
 
+        $dependencies = $this->getViewDependency($this->config->get('themeDirectory'));
+
         return $this->view = new Html(
-            $this->config->get('themeDirectory'),
-            $this->config->get('generatedThemeDirectory')
+            $this->config->get('themeDirectory') . '/layout',
+            $this->config->get('generatedThemeDirectory') . '/layout',
+            $dependencies
         );
+    }
+
+    private function getViewDependency(string $themeDirectory, bool $childTheme = false): array
+    {
+        $result = [];
+        if ($childTheme) {
+            $result = [$themeDirectory];
+        }
+
+        $themeConfigFile = "{$themeDirectory}/config.json";
+        $themeConfig = [];
+        if (is_file($themeConfigFile)) {
+            $themeConfig = json_decode(file_get_contents($themeConfigFile), true);
+        }
+
+        $dependency = $themeConfig['dependency'] ?? null;
+        if (!$dependency) {
+            return $result;
+        }
+
+        $dependencyArray = $this->getViewDependency("{$this->config->get('viewDirectory')}/{$dependency}", true);
+
+        return array_merge($result, $dependencyArray);
     }
 
     /**
