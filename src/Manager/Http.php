@@ -114,6 +114,11 @@ class Http implements Manager
         );
     }
 
+    /**
+     * @param string $themeDirectory
+     * @param bool $childTheme
+     * @return array|string[]
+     */
     private function getViewDependency(string $themeDirectory, bool $childTheme = false): array
     {
         $result = [];
@@ -130,6 +135,10 @@ class Http implements Manager
         $dependency = $themeConfig['dependency'] ?? null;
         if (!$dependency) {
             return $result;
+        }
+
+        if ("{$this->config->get('viewDirectory')}/{$dependency}" === $themeDirectory) {
+            throw new Exception("Theme dependency loop detected in {$themeConfigFile}. Dependency cannot use the same theme.");
         }
 
         $dependencyArray = $this->getViewDependency("{$this->config->get('viewDirectory')}/{$dependency}", true);
