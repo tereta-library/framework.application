@@ -223,11 +223,28 @@ class Manager
             $user = $this->config->get("db.{$name}.user");
             $password = $this->config->get("db.{$name}.password");
             $database = $this->config->get("db.{$name}.database");
+
+            if (!$host) {
+                $this->config->set("db.{$name}.host", $host = '127.0.0.1');
+            }
+
+            if (!$user) {
+                $this->config->set("db.{$name}.user", $user = 'developer');
+            }
+
+            if (!$password) {
+                $this->config->set("db.{$name}.password", $password = 'developer');
+            }
+
+            if (!$database) {
+                $this->config->set("db.{$name}.database", $database = 'developer');
+            }
+
             Singleton::createConnection(
-                $host ?? '127.0.0.1',
-                $user ?? 'developer',
-                $password ?? 'developer',
-                $database ?? 'developer',
+                $host,
+                $user,
+                $password,
+                $database,
                 $name
             );
         }
