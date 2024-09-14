@@ -56,8 +56,7 @@ class Error
             header('HTTP/1.0 404 Not Found');
             return $view->render();
         } catch (Exception $e) {
-            header('HTTP/1.1 500');
-            return $e->getMessage();
+            return $this->fatal($e);
         }
     }
 
@@ -87,7 +86,7 @@ class Error
                 "<tr><th>Message </th><td>{$e->getMessage()}</td></tr>" .
                 "<tr><th>File </th><td>{$e->getFile()}</td></tr>" .
                 "<tr><th>Line </th><td>{$e->getLine()}</td></tr>" .
-                "<tr><th>Trace </th><td>{$e->getTraceAsString()}</td></tr>" .
+                "<tr><th>Trace </th><td><pre>{$e->getTraceAsString()}</pre></td></tr>" .
                 "</table></body></html>";
         }
     }
