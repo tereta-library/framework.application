@@ -84,6 +84,8 @@ class Error
         } catch (Exception $eError) {
             return "<html><body><h1>500 Fatal Error</h1><table>" .
                 "<tr><th>Message </th><td>{$e->getMessage()}</td></tr>" .
+                "<tr><th>Code </th><td>{$e->getCode()}</td></tr>" .
+                "<tr><th>Type </th><td>" . get_class($e) . "</td></tr>" .
                 "<tr><th>File </th><td>{$e->getFile()}</td></tr>" .
                 "<tr><th>Line </th><td>{$e->getLine()}</td></tr>" .
                 "<tr><th>Trace </th><td><pre>{$e->getTraceAsString()}</pre></td></tr>" .
