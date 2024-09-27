@@ -75,6 +75,8 @@ class Installation
                 if (in_array($reflectionMethod->name, $reservedMethod)) continue;
 
                 $creatingTime = $this->getDateTimeCreating($reflectionClass->name, $reflectionMethod->name);
+                if ($creatingTime === null) continue;
+
                 $setupCollected[$creatingTime][] = [$reflectionClass, $reflectionMethod];
             }
         }
@@ -93,12 +95,14 @@ class Installation
     /**
      * @param string $class
      * @param string $method
-     * @return int
+     * @return int|null
      * @throws ReflectionException
      */
-    private function getDateTimeCreating(string $class, string $method): int
+    private function getDateTimeCreating(string $class, string $method): ?int
     {
         $docVariables = PhpDoc::getMethodVariables($class, $method);
+        if (!isset($docVariables['date'])) return null;
+
         if (preg_match('/^([0-9]{4})-([0-9]{2})-([0-9]{2}) ([0-9]{2}):([0-9]{2}):([0-9]{2}).*$/Usi', $docVariables['date'], $match)) {
             return mktime((int) $match[4], (int) $match[5], (int) $match[6], (int) $match[2], (int) $match[3], (int) $match[1]);
         }
