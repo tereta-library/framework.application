@@ -54,7 +54,8 @@ class Error
                 ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}");
 
             header('HTTP/1.0 404 Not Found');
-            return $view->render();
+            $return = $view->render();
+            return $return;
         } catch (Exception $e) {
             return $this->fatal($e);
         }

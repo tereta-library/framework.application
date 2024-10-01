@@ -110,6 +110,7 @@ class Http implements Manager
         return $this->view = new Html(
             $this->config->get('themeDirectory') . '/layout',
             $this->config->get('generatedThemeDirectory') . '/layout',
+            $this->config->get('generatedThemeDirectory') . '/cache',
             $dependencies
         );
     }
