@@ -113,7 +113,7 @@ class Http implements Manager
             $this->config->get('generatedThemeDirectory') . '/layout',
             $this->config->get('generatedThemeDirectory') . '/cache',
             $dependencies,
-            $this->config->get('cache') === null ? true : false
+            $this->config->get('cache') !== null ? $this->config->get('cache') : true
         );
     }
 
