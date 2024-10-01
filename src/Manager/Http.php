@@ -98,6 +98,7 @@ class Http implements Manager
 
     /**
      * @return Html|null
+     * @throws Exception
      */
     public function getView(): ?Html
     {
@@ -111,7 +112,8 @@ class Http implements Manager
             $this->config->get('themeDirectory') . '/layout',
             $this->config->get('generatedThemeDirectory') . '/layout',
             $this->config->get('generatedThemeDirectory') . '/cache',
-            $dependencies
+            $dependencies,
+            $this->config->get('cache') === null ? true : false
         );
     }
 
