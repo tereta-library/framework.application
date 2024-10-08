@@ -45,6 +45,11 @@ class Setup implements Controller
     private ?Config $config = null;
 
     /**
+     * @var Manager
+     */
+    private Manager $manager;
+
+    /**
      *
      */
     public function __construct()
