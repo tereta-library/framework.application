@@ -334,9 +334,28 @@ class Http implements Manager
             return false;
         }
 
-        $resourcePrefix = trim(static::RESOURCE_PREFIX, '/');
+        $resourcePrefix = static::RESOURCE_PREFIX . $this->config->get('version');
+        $resourcePrefixCurrent = static::RESOURCE_PREFIX . 'current';
         $parsedUri = parse_url($requestUri);
-        $resourceUri = substr($parsedUri['path'], strlen(static::RESOURCE_PREFIX));
+        $parsedPath = $parsedUri['path'];
+
+        $currentMode = false;
+        $resourceUri = null;
+        if (str_starts_with($parsedPath, $resourcePrefixCurrent)) {
+            $resourceUri = substr($parsedPath, strlen($resourcePrefixCurrent) + 1);
+            $currentMode = true;
+        }
+        if (str_starts_with($parsedPath, $resourcePrefix)) {
+            $resourceUri = substr($parsedPath, strlen($resourcePrefix) + 1);
+        }
+
+        if (!$resourceUri) {
+            header("HTTP/1.0 404 Not Found");
+            return true;
+        }
+
+        $resourcePrefix = ltrim($resourcePrefix, '/');
+
         $sourceFile = "{$this->rootDirectory}/app/view/{$resourceUri}";
         $publishThemeDir = "{$this->rootDirectory}/pub/{$resourcePrefix}";
         $publishFile = "{$publishThemeDir}/{$resourceUri}";
@@ -353,6 +372,14 @@ class Http implements Manager
 
         if (!file_exists($publishFile)) {
             symlink($sourceFile, $publishFile);
+        }
+
+        $publishCurrentThemeDir = "{$this->rootDirectory}/pub/{$resourcePrefixCurrent}";
+        if ($currentMode && is_link($publishCurrentThemeDir) && readlink($publishCurrentThemeDir) !== $publishThemeDir) {
+            unlink($publishCurrentThemeDir);
+        }
+        if ($currentMode && !is_link($publishCurrentThemeDir)) {
+            symlink($publishThemeDir, $publishCurrentThemeDir);
         }
 
         $contentType = mime_content_type($publishFile);
