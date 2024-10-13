@@ -108,13 +108,18 @@ class Http implements Manager
 
         $dependencies = $this->getViewDependency($this->config->get('themeDirectory'));
 
-        return $this->view = new Html(
+        $this->view = new Html(
             $this->config->get('themeDirectory') . '/layout',
             $this->config->get('generatedThemeDirectory') . '/layout',
             $this->config->get('generatedThemeDirectory') . '/cache',
             $dependencies,
             $this->config->get('cache') !== null ? $this->config->get('cache') : true
         );
+
+        $this->view->assign('config', $this->config);
+        $this->view->assign('version', $this->config->get('version'));
+
+        return $this->view;
     }
 
     /**
