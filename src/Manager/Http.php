@@ -306,18 +306,38 @@ class Http implements Manager
         return $this->routerTypes = $routerMap;
     }
 
+    private function getRequestUri(): string
+    {
+        $uri = $_SERVER['REQUEST_URI'];
+
+        $parsedUrl = parse_url($uri);
+        parse_str($parsedUrl['query'] ?? '', $queryParams);
+        if (isset($queryParams['adminVersion'])) {
+            unset($queryParams['adminVersion']);
+        }
+
+        $uri = $parsedUrl['path'];
+        if ($queryParams) {
+            $uri .= '?' . http_build_query($queryParams);
+        }
+
+        return $uri;
+    }
+
     /**
      * @return void
      */
     public function run(): void
     {
         try {
-            if ($this->mapResource($_SERVER['REQUEST_URI'])) {
+            $requestUri = $this->getRequestUri();
+
+            if ($this->mapResource($requestUri)) {
                 return;
             }
 
             echo $this->runAction(
-                $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_HOST'], $_SERVER['REQUEST_URI'])
+                $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_HOST'], $requestUri)
             );
         } catch (Exception $e) {
             echo (new ControllerError)->fatal($e);
