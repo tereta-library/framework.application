@@ -12,6 +12,6 @@ class Error extends Template
     protected function construct(): void
     {
         $this->assign('title')->assign('code')->assign('method')->assign('url')
-            ->assign('message')->assign('backTrace');
+            ->assign('message')->assign('backTrace')->assign('file')->assign('line');
     }
 }

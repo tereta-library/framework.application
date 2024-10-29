@@ -80,6 +80,8 @@ class Error
                 ->assign('method', $_SERVER['REQUEST_METHOD'])
                 ->assign('url', "{$scheme}://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}")
                 ->assign('message', $e->getMessage())
+                ->assign('file', $e->getFile())
+                ->assign('line', $e->getLine())
                 ->assign('backTrace', $e->getTraceAsString());
             return $view->render();
         } catch (Exception $eError) {
