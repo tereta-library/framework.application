@@ -337,7 +337,7 @@ class Http implements Manager
             }
 
             echo $this->runAction(
-                $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['REQUEST_SCHEME'], $_SERVER['HTTP_HOST'], $requestUri)
+                $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['REQUEST_SCHEME'], $_SERVER['HTTP_HOST'], $requestUri)
             );
         } catch (Exception $e) {
             echo (new ControllerError)->fatal($e);
