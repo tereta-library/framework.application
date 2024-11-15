@@ -19,7 +19,7 @@ class Payload extends ValueObject
             return $this;
         }
 
-        $this->setData(json_decode($data, true));
+        $this->setData(json_decode($data, true) ?? []);
         return $this;
     }
 }
