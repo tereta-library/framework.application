@@ -337,9 +337,11 @@ class Http implements Manager
                 return;
             }
 
-            echo $this->runAction(
-                $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['REQUEST_SCHEME'], $_SERVER['HTTP_HOST'], $requestUri)
-            );
+            $router = $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['REQUEST_SCHEME'], $_SERVER['HTTP_HOST'], $requestUri);
+
+            $this->parent->getEvents()->dispatch('application.manager.router', ['router' => &$router]);
+
+            echo $this->runAction($router);
         } catch (Exception $e) {
             echo (new ControllerError)->fatal($e);
         }

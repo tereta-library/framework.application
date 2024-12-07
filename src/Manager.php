@@ -356,12 +356,11 @@ class Manager
     }
 
     /**
-     * @param bool $reset
      * @return Observer
      */
-    private function getEvents(bool $reset = false): Observer
+    public function getEvents(): Observer
     {
-        if (!$reset && $this->events) {
+        if ($this->events) {
             return $this->events;
         }
 
