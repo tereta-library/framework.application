@@ -32,6 +32,10 @@ class Error
     public function domainNotFound(): ?string
     {
         $config = Manager::getInstance()->getConfig();
+        if (!$config->get('domainNotFoundRedirect')) {
+            return 'Fatal Error: Domain configuration not found';
+        }
+
         header('HTTP/1.0 301 Domain not found');
         header('Location: ' . $config->get('domainNotFoundRedirect'));
         return 'Domain not found';
