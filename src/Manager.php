@@ -340,15 +340,19 @@ class Manager
      */
     public function run(): void
     {
-        if (!$this->isConfigured) {
-            $this->setConfig();
-        }
+        try {
+            if (!$this->isConfigured) {
+                $this->setConfig();
+            }
 
-        if (!$this->isRouterConfigured) {
-            $this->setRouter();
-        }
+            if (!$this->isRouterConfigured) {
+                $this->setRouter();
+            }
 
-        $this->adapter->run();
+            $this->adapter->run();
+        } catch (Exception $e) {
+            $this->adapter->runException($e);
+        }
     }
 
     /**

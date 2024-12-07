@@ -26,6 +26,20 @@ use Exception;
  */
 class Error
 {
+    /**
+     * @return string|null
+     */
+    public function domainNotFound(): ?string
+    {
+        $config = Manager::getInstance()->getConfig();
+        header('HTTP/1.0 301 Domain not found');
+        header('Location: ' . $config->get('domainNotFoundRedirect'));
+        return 'Domain not found';
+    }
+
+    /**
+     * @return string|null
+     */
     public function notFound(): ?string
     {
         $view = Manager::getInstance()->getView();

@@ -23,6 +23,7 @@ use Framework\Helper\PhpDoc;
 use ReflectionException;
 use Framework\Http\Interface\Controller;
 use Framework\View\Html;
+use Builder\Site\Model\Domain\Exception as DomainException;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -340,6 +341,15 @@ class Http implements Manager
                 $this->router->run($_SERVER['REQUEST_METHOD'], $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['REQUEST_SCHEME'], $_SERVER['HTTP_HOST'], $requestUri)
             );
         } catch (Exception $e) {
+            echo (new ControllerError)->fatal($e);
+        }
+    }
+
+    public function runException(Exception $e): void
+    {
+        if ($e instanceof DomainException) {
+            echo (new ControllerError)->domainNotFound($e);
+        } else {
             echo (new ControllerError)->fatal($e);
         }
     }
