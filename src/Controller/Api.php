@@ -2,7 +2,6 @@
 
 namespace Framework\Application\Controller;
 
-use Framework\Application\Manager\Http\Parameter\Get as GetParameter;
 use Framework\Helper\PhpDoc;
 use Framework\Http\Interface\Controller;
 use Framework\Api\Factory as ApiFactory;
@@ -10,8 +9,10 @@ use Exception;
 use Framework\Application\Manager;
 use ReflectionClass;
 use Framework\Api\Interface\Api as ApiInterface;
+use Framework\Application\Manager\Http\Parameter\Get as GetParameter;
 use Framework\Application\Manager\Http\Parameter\Payload as PayloadParameter;
 use Framework\Application\Manager\Http\Parameter\Post as PostParameter;
+use Framework\Application\Manager\Http\Parameter\Server as ServerParameter;
 use Framework\Application\Manager\Http\Parameter as HttpParameter;
 
 /**
@@ -48,6 +49,7 @@ class Api implements Controller
         $payloadObject = (new PayloadParameter())->decode(file_get_contents('php://input'));
         $postObject = (new PostParameter($_POST));
         $getObject = (new GetParameter($_GET));
+        $serverObject = (new ServerParameter($_SERVER));
         $apiSpecification = (new ApiFactory())->create($format);
         $requestMethod = $_SERVER['REQUEST_METHOD'];
 
@@ -91,7 +93,7 @@ class Api implements Controller
             array_pop($apiMethodParametersReflection);
 
             $invokeArguments = HttpParameter::methodDetection(
-                $apiMethodReflection, array_merge($apiParams, [$payloadObject, $postObject, $getObject])
+                $apiMethodReflection, array_merge($apiParams, [$payloadObject, $postObject, $getObject, $serverObject])
             );
 
             $output = $apiMethodReflection->invokeArgs($classInstance, $invokeArguments);
