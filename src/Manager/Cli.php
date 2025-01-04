@@ -11,6 +11,7 @@ use ReflectionClass;
 use Framework\Helper\PhpDoc;
 use ReflectionException;
 use Exception;
+use Framework\Cli\Symbol as CliSymbol;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -101,5 +102,12 @@ class Cli implements Manager
     public function run(): void
     {
         $this->router->run($_SERVER['argv']);
+    }
+
+    public function runException(Exception $e): void
+    {
+
+        echo CliSymbol::COLOR_RED . $e->getMessage() . "\n";
+        echo CliSymbol::COLOR_YELLOW . $e->getTraceAsString() . CliSymbol::STYLE_RESET . "\n";
     }
 }
