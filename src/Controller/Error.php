@@ -81,7 +81,7 @@ class Error
 
     public function fatal(?Exception $e = null): string
     {
-        header('HTTP/1.1 500');
+        header('HTTP/1.1 500 Internal Server Error');
 
         $view = Manager::getInstance()->getView();
 
