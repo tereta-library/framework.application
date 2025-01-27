@@ -2,6 +2,7 @@
 
 namespace Framework\Application\Controller;
 
+use Builder\Site\Services\Translation as TranslationService;
 use Framework\Application\Manager;
 use Exception;
 
@@ -65,6 +66,8 @@ class Error
                 ->getBlockById('main');
 
             if (!$block) throw new Exception('The #main block was not found');
+
+            TranslationService::singleton()->initialise();
 
             $block->assign('title', '404 Not Found')
                 ->assign('code', 404)
