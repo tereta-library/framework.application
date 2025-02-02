@@ -29,7 +29,7 @@ class Make implements Controller
 
     /**
      * @cli make:setup
-     * @cliDescription Make model: sample "php cli make:setup Vendor/Module/Setup/Name"
+     * @cliDescription Make model: sample "php cli.php make:setup Vendor/Module/Setup/Name"
      * @param string $setupClassName Full class name like "Vendor/Module/Setup/Name" or "Vendor/Module/Setup/Space/Name"
      * @param string $setupFunctionName Function name like "createTable" or "newScheme" or "insertValues" or any name to use as the setup function
      * @return void
