@@ -86,7 +86,7 @@ class Make implements Controller
             "        \$query = Factory::createTable('testTable');\n" .
             "        \$query->addInteger('id')->setAutoIncrement()->setNotNull()->setPrimaryKey()->setComment('Table row ID');\n" .
             "        \$query->addForeign(\$connection, 'siteId')->foreign('site', 'id')->setComment('Site ID');\n" .
-            "        \$query->addString('identifier', \$query::TYPE_VARCHAR)->setNotNull()->setComment('identifier');\n" .
+            "        \$query->addString('identifier')->setNotNull()->setComment('identifier');\n" .
             "        \$query->addUnique('siteId', 'identifier');\n" .
             "        \$connection->query(\$query->build());\n" .
             "        \n" .
