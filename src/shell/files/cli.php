@@ -12,9 +12,14 @@ require_once "{$rootDir}/vendor/autoload.php";
 use Framework\Application\Manager;
 use Framework\Cli\Symbol;
 
+if (!function_exists('xdebug_break')) {
+    function xdebug_break() {
+    }
+}
+
 try {
     Manager::init($rootDir, 'cli')->setRouter([
-        'setup' => 'Framework\Application\Cli\Setup->setup'
+        'setup' => 'Framework\Application\Command\Setup->execute'
     ], true)->run();
 } catch (Exception $e) {
     echo Symbol::COLOR_RED . "{$e->getMessage()}\n" . Symbol::COLOR_RESET;
