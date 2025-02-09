@@ -77,6 +77,7 @@ class Api implements Controller
 
         try {
             if (!$apiFound) {
+                /* @todo Need translation */
                 throw new Exception("The \"{$identifier}\" API endpoint not found", 404);
             }
 
