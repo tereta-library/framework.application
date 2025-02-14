@@ -99,6 +99,7 @@ class Api implements Controller
 
             $output = $apiMethodReflection->invokeArgs($classInstance, $invokeArguments);
         } catch (Exception $e) {
+            xdebug_break();
             return $apiSpecification->encode([
                 'error' => $e->getMessage(),
                 'errorCode' => $e->getCode()
