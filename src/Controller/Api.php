@@ -14,6 +14,7 @@ use Framework\Application\Manager\Http\Parameter\Payload as PayloadParameter;
 use Framework\Application\Manager\Http\Parameter\Post as PostParameter;
 use Framework\Application\Manager\Http\Parameter\Server as ServerParameter;
 use Framework\Application\Manager\Http\Parameter as HttpParameter;
+use Framework\Application\Helper\Exception as HelperException;
 
 /**
  * ···························WWW.TERETA.DEV······························
@@ -101,8 +102,9 @@ class Api implements Controller
         } catch (Exception $e) {
             xdebug_break();
             return $apiSpecification->encode([
-                'error' => $e->getMessage(),
-                'errorCode' => $e->getCode()
+                'error'      => $e->getMessage(),
+                'errorCode'  => $e->getCode(),
+                'errorScope' => HelperException::getScope($e)
             ]);
         }
 
