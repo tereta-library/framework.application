@@ -310,8 +310,9 @@ class Http implements Manager
     private function getRequestUri(): string
     {
         $uri = $_SERVER['REQUEST_URI'];
+        $url = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'] . $uri;
 
-        $parsedUrl = parse_url($uri);
+        $parsedUrl = parse_url($url);
         parse_str($parsedUrl['query'] ?? '', $queryParams);
         if (isset($queryParams['adminVersion'])) {
             unset($queryParams['adminVersion']);
