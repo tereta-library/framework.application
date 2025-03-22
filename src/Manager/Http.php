@@ -107,10 +107,11 @@ class Http implements Manager
             return $this->view;
         }
 
-        $dependencies = $this->getViewDependency($this->config->get('themeDirectory'));
+        $dependencies = $this->getViewDirectories();
+        $themeDirectory = array_shift($dependencies);
 
         $this->view = new Html(
-            $this->config->get('themeDirectory') . '/layout',
+            $themeDirectory . '/layout',
             $this->config->get('generatedThemeDirectory') . '/layout',
             $this->config->get('generatedThemeDirectory') . '/cache',
             $dependencies,
@@ -124,9 +125,22 @@ class Http implements Manager
     }
 
     /**
+     * @return string[]
+     * @throws Exception
+     */
+    public function getViewDirectories(): array
+    {
+        $themeDirectory = $this->config->get('themeDirectory');
+        $result = $this->getViewDependency($themeDirectory);
+        array_unshift($result, $themeDirectory);
+        return $result;
+    }
+
+    /**
      * @param string $themeDirectory
      * @param bool $childTheme
      * @return array|string[]
+     * @throws Exception
      */
     private function getViewDependency(string $themeDirectory, bool $childTheme = false): array
     {

@@ -267,6 +267,14 @@ class Manager
     }
 
     /**
+     * @return array
+     */
+    public function getViewDirectories(): array
+    {
+        return $this->adapter->getViewDirectories();
+    }
+
+    /**
      * @return Config
      */
     public function getConfig(): Config
