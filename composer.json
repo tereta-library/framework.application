@@ -2,7 +2,7 @@
     "name": "tereta/framework.application",
     "description": "Manager of http application library",
     "license": "Apache-2.0",
-    "version": "0.1.46",
+    "version": "0.1.48",
     "type": "library",
     "autoload": {
         "psr-4": {
@@ -16,13 +16,13 @@
         }
     ],
     "require": {
-        "tereta/framework.process": "^0.1.46",
-        "tereta/framework.http": "^0.1.46",
-        "tereta/framework.view": "^0.1.46",
-        "tereta/framework.cli": "^0.1.46",
-        "tereta/framework.docker": "^0.1.46",
-        "tereta/framework.helper": "^0.1.46",
-        "tereta/framework.database": "^0.1.46",
-        "tereta/framework.dom": "^0.1.46"
+        "tereta/framework.process": "^0.1.48",
+        "tereta/framework.http": "^0.1.48",
+        "tereta/framework.view": "^0.1.48",
+        "tereta/framework.cli": "^0.1.48",
+        "tereta/framework.docker": "^0.1.48",
+        "tereta/framework.helper": "^0.1.48",
+        "tereta/framework.database": "^0.1.48",
+        "tereta/framework.dom": "^0.1.48"
     }
 }
